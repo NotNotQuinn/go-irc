@@ -7,7 +7,7 @@ import (
 )
 
 func getTwitch() (*twitch.Client, error) {
-	conf, err := config.Get()
+	conf, err := config.GetPrivate()
 	if err != nil {
 		return nil, err
 	}
