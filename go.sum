@@ -1,2 +1,4 @@
 github.com/gempir/go-twitch-irc/v2 v2.5.0 h1:aybXNoyDNQaa4vHhXb0UpIDmspqutQUmXIYUFsjgecU=
 github.com/gempir/go-twitch-irc/v2 v2.5.0/go.mod h1:120d2SdlRYg8tRnZwsyNPeS+mWPn+YmNEzB7Bv/CDGE=
+github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
+github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
