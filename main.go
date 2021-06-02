@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"twitch-bot/client"
+	"twitch-bot/core/sender"
 	"twitch-bot/handlers"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -22,6 +23,9 @@ func main() {
 
 	fmt.Print(".")
 	cc.JoinAll()
+
+	fmt.Print(".")
+	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")
 	err = cc.Connect()
