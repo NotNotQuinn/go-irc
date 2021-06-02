@@ -5,18 +5,26 @@ import (
 	"io/ioutil"
 )
 
-type Config struct {
-	Username string `json:"username"`
-	Oauth    string `json:"oauth"`
+type PublicTwitchConfig struct {
+	Channels []string `json:"channels"`
 }
 
-func Get() (conf *Config, err error) {
-	bytes, err := ioutil.ReadFile("./config/conf.json")
+type PublicGlobalConfig struct {
+	CommandPrefix string `json:"commandPrefix"`
+}
+
+type PublicConfig struct {
+	Twitch PublicTwitchConfig `json:"twitch"`
+	Global PublicGlobalConfig `json:"global"`
+}
+
+func GetPublic() (*PublicConfig, error) {
+	bytes, err := ioutil.ReadFile("./config/public_conf.json")
 	if err != nil {
 		return nil, err
 	}
 
-	var config Config
+	var config PublicConfig
 	json.Unmarshal(bytes, &config)
 
 	return &config, nil

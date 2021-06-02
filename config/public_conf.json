@@ -1,0 +1,11 @@
+{
+    "twitch": {
+        "channels": [
+            "turtoise",
+            "quinndt"
+        ]
+    },
+    "global": {
+        "commandPrefix": "|"
+    }
+}
