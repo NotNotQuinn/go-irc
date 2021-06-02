@@ -15,7 +15,6 @@ func Privmsg(client *twitch.Client, msg twitch.PrivateMessage) {
 		return
 	}
 	if reason != "" {
-		fmt.Printf("Command faliure: %s\n", reason)
 		return
 	}
 	client.Say(msg.Channel, resp)
