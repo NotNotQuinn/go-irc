@@ -21,9 +21,9 @@ func HandleAllSends(cc *client.ClientCollection) {
 			// also any logging of messages sent
 			cc.Twitch.Say(*msg.Channel, *msg.Message)
 		case messages.Unknown:
-			fmt.Println(errors.New("platform set to 'unknown' for message, message not sent"))
+			channels.Errors <- errors.New("platform set to 'unknown' for message, message not sent")
 		default:
-			panic(fmt.Errorf("unknown platform!! %d", msg.Platform))
+			channels.Errors <- fmt.Errorf("unknown platform!! %d", msg.Platform)
 		}
 	}
 }

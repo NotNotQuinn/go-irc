@@ -1,7 +1,7 @@
 package twitchHandler
 
 import (
-	"fmt"
+	"github.com/NotNotQuinn/go-irc/channels"
 
 	"github.com/NotNotQuinn/go-irc/core/command"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
@@ -9,13 +9,9 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-func Privmsg(client *twitch.Client, msg twitch.PrivateMessage) {
-	fmt.Printf("[%s] %s: %s\n", msg.Channel, msg.User.Name, msg.Message)
-	message := messages.Incoming{
-		Platform: messages.Twitch,
-		Channel:  &msg.Channel,
-		Message:  &msg.Message,
-		User:     &msg.User.Name,
+func Privmsg(msg twitch.PrivateMessage) {
+	err := command.HandleMessage(messages.NewIncoming(&msg))
+	if err != nil {
+		channels.Errors <- err
 	}
-	command.HandleMessage(&message)
 }

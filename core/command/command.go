@@ -24,14 +24,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 
 	switch command {
 	case "ping":
-		resp := "Pong! " + *inMsg.User + " in #" + *inMsg.Channel
-		channels.MessagesOUT <- &messages.Outgoing{
-			Platform:        messages.Twitch,
-			Message:         &resp,
-			Channel:         inMsg.Channel,
-			User:            inMsg.User,
-			IncomingMessage: inMsg,
-		}
+		channels.MessagesOUT <- messages.NewOutgoing(inMsg, "Pong! "+*inMsg.User+" in #"+*inMsg.Channel)
 	}
 	return nil
 }

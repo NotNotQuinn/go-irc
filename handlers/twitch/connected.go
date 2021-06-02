@@ -3,10 +3,11 @@ package twitchHandler
 import (
 	"fmt"
 
-	"github.com/gempir/go-twitch-irc/v2"
+	"github.com/NotNotQuinn/go-irc/channels"
+	"github.com/NotNotQuinn/go-irc/core/command/messages"
 )
 
-func Connected(client *twitch.Client) {
+func Connected() {
 	fmt.Println("Connected!")
-	client.Say("turtoise", "Hi :)")
+	channels.MessagesOUT <- messages.NewOutgoing(nil, "Hi :)")
 }
