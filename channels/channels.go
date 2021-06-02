@@ -1,7 +1,7 @@
 package channels
 
 import (
-	"twitch-bot/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core/command/messages"
 )
 
 var (

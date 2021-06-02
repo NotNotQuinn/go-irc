@@ -1,4 +1,4 @@
-module twitch-bot
+module github.com/NotNotQuinn/go-irc
 
 go 1.16
 

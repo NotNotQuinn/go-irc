@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"twitch-bot/client"
-	"twitch-bot/core/sender"
-	"twitch-bot/handlers"
+
+	"github.com/NotNotQuinn/go-irc/client"
+	"github.com/NotNotQuinn/go-irc/core/sender"
+	"github.com/NotNotQuinn/go-irc/handlers"
 
 	_ "github.com/go-sql-driver/mysql"
 )

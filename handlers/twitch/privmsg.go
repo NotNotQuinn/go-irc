@@ -2,8 +2,9 @@ package twitchHandler
 
 import (
 	"fmt"
-	"twitch-bot/core/command"
-	"twitch-bot/core/command/messages"
+
+	"github.com/NotNotQuinn/go-irc/core/command"
+	"github.com/NotNotQuinn/go-irc/core/command/messages"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )

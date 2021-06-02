@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"twitch-bot/client"
-	twitchHandler "twitch-bot/handlers/twitch"
+	"github.com/NotNotQuinn/go-irc/client"
+	twitchHandler "github.com/NotNotQuinn/go-irc/handlers/twitch"
 )
 
 type ClientsHandled struct {

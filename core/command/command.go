@@ -2,9 +2,10 @@ package command
 
 import (
 	"strings"
-	"twitch-bot/channels"
-	"twitch-bot/config"
-	"twitch-bot/core/command/messages"
+
+	"github.com/NotNotQuinn/go-irc/channels"
+	"github.com/NotNotQuinn/go-irc/config"
+	"github.com/NotNotQuinn/go-irc/core/command/messages"
 )
 
 func HandleMessage(inMsg *messages.Incoming) error {

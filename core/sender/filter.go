@@ -1,7 +1,7 @@
 package sender
 
 import (
-	"twitch-bot/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core/command/messages"
 )
 
 func handleFilterForMessage(msg *messages.Outgoing) *messages.Outgoing {

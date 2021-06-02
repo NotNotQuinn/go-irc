@@ -1,7 +1,7 @@
 package client
 
 import (
-	"twitch-bot/config"
+	"github.com/NotNotQuinn/go-irc/config"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )

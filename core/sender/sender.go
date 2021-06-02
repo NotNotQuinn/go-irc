@@ -3,9 +3,10 @@ package sender
 import (
 	"errors"
 	"fmt"
-	"twitch-bot/channels"
-	"twitch-bot/client"
-	"twitch-bot/core/command/messages"
+
+	"github.com/NotNotQuinn/go-irc/channels"
+	"github.com/NotNotQuinn/go-irc/client"
+	"github.com/NotNotQuinn/go-irc/core/command/messages"
 )
 
 func HandleAllSends(cc *client.ClientCollection) {
