@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/NotNotQuinn/go-irc/client"
+	cmd "github.com/NotNotQuinn/go-irc/cmds"
+	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
 	"github.com/NotNotQuinn/go-irc/errorStream"
 	"github.com/NotNotQuinn/go-irc/handlers"
@@ -12,8 +14,11 @@ import (
 )
 
 func main() {
-	fmt.Print("Starting")
 	go errorStream.Listen()
+	go incoming.HandleAll()
+
+	fmt.Print("Starting")
+	cmd.LoadAll()
 
 	// Dots to show progress, even though they mostly go all at once
 	// its a good measure of startup speed changing over time.
@@ -28,8 +33,6 @@ func main() {
 
 	fmt.Print(".")
 	cc.JoinAll()
-
-	fmt.Print(".")
 	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")

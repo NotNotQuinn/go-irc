@@ -9,5 +9,5 @@ import (
 
 func Connected() {
 	fmt.Println("Connected!")
-	channels.MessagesOUT <- messages.NewOutgoing(nil, "Hi :)")
+	channels.MessagesOUT <- messages.FakeOutgoing("turtoise", "Hi :)", messages.Twitch)
 }

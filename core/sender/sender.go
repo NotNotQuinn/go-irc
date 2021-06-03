@@ -18,7 +18,10 @@ func HandleAllSends(cc *client.ClientCollection) {
 		msg = handleFilterForMessage(msg)
 		switch msg.Platform {
 		case messages.Twitch:
-			// also any logging of messages sent
+			if msg.DM {
+				cc.Twitch.Whisper(*msg.User, *msg.Message)
+				continue
+			}
 			cc.Twitch.Say(*msg.Channel, *msg.Message)
 		case messages.Unknown:
 			channels.Errors <- errors.New("platform set to 'unknown' for message, message not sent")

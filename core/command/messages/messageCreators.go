@@ -6,6 +6,15 @@ import (
 
 func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 	switch v := msg.(type) {
+	case *twitch.WhisperMessage:
+		return &Incoming{
+			Platform: Twitch,
+			Channel:  nil,
+			Message:  &v.Message,
+			User:     &v.User.Name,
+			Raw:      (*twitch.Message)(&msg),
+			DMs:      true,
+		}
 	case *twitch.PrivateMessage:
 		return &Incoming{
 			Platform: Twitch,
@@ -30,6 +39,7 @@ func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 			Channel:         nil,
 			User:            nil,
 			IncomingMessage: nil,
+			DM:              false,
 		}
 	}
 	return &Outgoing{
@@ -38,6 +48,7 @@ func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 		Channel:         inMsg.Channel,
 		User:            inMsg.User,
 		IncomingMessage: inMsg,
+		DM:              inMsg.DMs,
 	}
 }
 
@@ -49,8 +60,4 @@ func FakeOutgoing(channel, message string, platform PlatformType) *Outgoing {
 		User:            nil,
 		IncomingMessage: nil,
 	}
-}
-
-func FakeTwitchOutgoing(channel, message string) *Outgoing {
-	return FakeOutgoing(channel, message, Twitch)
 }
