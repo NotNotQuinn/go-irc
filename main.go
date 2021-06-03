@@ -9,8 +9,6 @@ import (
 	"github.com/NotNotQuinn/go-irc/core/sender"
 	"github.com/NotNotQuinn/go-irc/errorStream"
 	"github.com/NotNotQuinn/go-irc/handlers"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
