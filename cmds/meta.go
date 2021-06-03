@@ -90,3 +90,10 @@ func (cmd *Command) load() {
 	}
 	cmd.register()
 }
+
+func LoadAll() {
+	pingCommand.load()
+	commandCommand.load()
+	aboutCommand.load()
+	githubCommand.load()
+}
