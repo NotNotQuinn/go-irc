@@ -1,4 +1,4 @@
-package twitchHandler
+package handlers
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-func AttachAll(client *twitch.Client) {
+func TwitchAttach(client *twitch.Client) {
 	client.OnConnect(connected)
 	client.OnPrivateMessage(privmsg)
 	client.OnWhisperMessage(whisper)

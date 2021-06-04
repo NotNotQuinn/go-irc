@@ -3,16 +3,24 @@ package main
 import (
 	"fmt"
 
+	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/client"
-	cmd "github.com/NotNotQuinn/go-irc/cmds"
+	cmd "github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
-	"github.com/NotNotQuinn/go-irc/errorStream"
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
 
 func main() {
-	go errorStream.Listen()
+	go func() {
+		for {
+			// although it doesnt seem like much, it allows for good error loggin later on.
+			// Errors should only be passed to this stream if there is no other place, and
+			// a panic is not sutible
+			err := <-channels.Errors
+			fmt.Printf("Error: %+v\n", err)
+		}
+	}()
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")

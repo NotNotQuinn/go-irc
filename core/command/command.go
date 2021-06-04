@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/NotNotQuinn/go-irc/channels"
-	cmd "github.com/NotNotQuinn/go-irc/cmds"
+	cmd "github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
 )
