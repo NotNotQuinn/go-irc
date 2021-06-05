@@ -4,18 +4,18 @@ import "github.com/gempir/go-twitch-irc/v2"
 
 type Outgoing struct {
 	Platform        PlatformType
-	Message         *string
-	Channel         *string
-	User            *string
+	Message         string
+	Channel         string
+	User            string
 	DM              bool
 	IncomingMessage *Incoming
 }
 
 type Incoming struct {
 	Platform PlatformType
-	Channel  *string
-	Message  *string
-	User     *string
+	Channel  string
+	Message  string
+	User     string
 	Raw      *twitch.Message
 	DMs      bool
 }

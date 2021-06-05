@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
+	"time"
 
 	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
@@ -18,16 +18,20 @@ var (
 const NoCommandName = "__ LHLKJHDLKJHSDLKJSHDuhlkghI&#^GRITK#^RFGKbmf vkyfsmrg"
 
 type Command struct {
-	Name      string
-	Aliases   []string
-	Execution func(*Context) (Return, error)
-	onLoad    func() error
-	Data      DataType
+	Name        string
+	Aliases     []string
+	Execution   func(*Context) (*Return, error)
+	onLoad      func() error
+	Data        DataType
+	Whitelist   Whitelist
+	Description string
+	Cooldown    time.Duration
 }
 
 type Context struct {
-	Incoming messages.Incoming
-	Args     []string
+	Incoming   messages.Incoming
+	Args       []string
+	Invocation string
 }
 
 type Return struct {
@@ -40,7 +44,7 @@ type DataType map[string]string
 func (r *Return) ToOutgoing(ctx *Context) *messages.Outgoing {
 	return &messages.Outgoing{
 		Platform:        messages.Twitch,
-		Message:         &r.Reply,
+		Message:         r.Reply,
 		Channel:         ctx.Incoming.Channel,
 		User:            ctx.Incoming.User,
 		DM:              ctx.Incoming.DMs,
@@ -68,16 +72,21 @@ func (cmd *Command) ensureDefaults() {
 		cmd.Aliases = []string{}
 	}
 	if cmd.Execution == nil {
-		cmd.Execution = func(c *Context) (Return, error) {
-			return Return{
+		cmd.Execution = func(c *Context) (*Return, error) {
+			return &Return{
 				Success: false,
-				Reply:   "This command has no definition :)",
 			}, nil
 		}
 	}
 	if cmd.Name == "" {
-		channels.Errors <- errors.New("command does not have a name")
+		channels.Errors <- fmt.Errorf("command does not have a name\n%+v", cmd)
 		cmd.Name = NoCommandName
+	}
+	if cmd.Description == "" {
+		cmd.Description = "(no description)"
+	}
+	if cmd.Cooldown == 0 {
+		cmd.Cooldown = time.Second * 5
 	}
 }
 
@@ -91,9 +100,26 @@ func (cmd *Command) load() {
 	cmd.register()
 }
 
+type Whitelist int
+
+const (
+	WL_none      Whitelist = 0
+	WL_adminOnly Whitelist = 1
+)
+
+func GetCmd(name string) *Command {
+	command := Commands[name]
+	if command == nil {
+		command = Commands[CommandAliasMap[name]]
+	}
+	return command
+}
+
 func LoadAll() {
 	pingCommand.load()
 	commandCommand.load()
 	aboutCommand.load()
 	githubCommand.load()
+	joinCommand.load()
+	gachiCommand.load()
 }

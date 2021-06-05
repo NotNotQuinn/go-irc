@@ -2,15 +2,24 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/fs"
 	"io/ioutil"
+	"os"
 )
+
+var confFile = "./config/public_conf.json"
+var Public *PublicConfig
+var Private *PrivateConfig
 
 type PublicTwitchConfig struct {
 	Channels []string `json:"channels"`
 }
 
 type PublicGlobalConfig struct {
-	CommandPrefix string `json:"commandPrefix"`
+	CommandPrefix  string `json:"commandPrefix"`
+	Admin_Username string `json:"admin_username"`
+	UserAgent      string `json:"user_agent"`
 }
 
 type PublicConfig struct {
@@ -18,16 +27,60 @@ type PublicConfig struct {
 	Global PublicGlobalConfig `json:"global"`
 }
 
-func GetPublic() (*PublicConfig, error) {
-	bytes, err := ioutil.ReadFile("./config/public_conf.json")
+func Init() error {
+	var err error
+	Private, err = getPrivate()
+	if err != nil {
+		return err
+	}
+	Public, err = getPublic()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getPublic() (*PublicConfig, error) {
+	bytes, err := ioutil.ReadFile(confFile)
 	if err != nil {
 		return nil, err
 	}
-
 	var config PublicConfig
 	json.Unmarshal(bytes, &config)
-
 	return &config, nil
+}
+
+func (conf *PublicConfig) Reload() error {
+	bytes, err := ioutil.ReadFile(confFile)
+	if err != nil {
+		return err
+	}
+	var config PublicConfig
+	json.Unmarshal(bytes, &config)
+	return nil
+}
+
+func (conf *PublicConfig) Save() (success bool, err error) {
+	bytes, err := json.MarshalIndent(conf, "", "\t")
+	if err != nil {
+		return false, err
+	}
+	file, err := os.Create(confFile)
+	if err != nil {
+		return false, err
+	}
+	numBytes, err := file.Write(bytes)
+	if err != nil {
+		file.Close()
+		return false, err
+	}
+	fmt.Printf("Conf saved successfully (%d bytes)\n", numBytes)
+	err = file.Close()
+	if err != nil {
+		return true, err
+	}
+	err = ioutil.WriteFile(confFile, bytes, fs.ModeType)
+	return true, err
 }
 
 // Handling private config
@@ -41,7 +94,7 @@ type PrivateConfig struct {
 	Oauth string `json:"oauth"`
 }
 
-func GetPrivate() (conf *PrivateConfig, err error) {
+func getPrivate() (conf *PrivateConfig, err error) {
 	bytes, err := ioutil.ReadFile("./config/private_conf.json")
 	if err != nil {
 		return nil, err

@@ -2,19 +2,39 @@ package main
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/client"
-	cmd "github.com/NotNotQuinn/go-irc/cmd"
+	"github.com/NotNotQuinn/go-irc/cmd"
+	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
 
+var restartMult = 1
+
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			s := fmt.Sprint(err)
+			if strings.Contains(s, "no such host") && strings.Contains(s, "irc.chat.twitch.tv") {
+				if !(restartMult > 20) {
+					restartMult *= 2
+				}
+				sleepTime := time.Second * 15 * time.Duration(restartMult)
+				fmt.Println("\nConnection interupted, attempting restart in", sleepTime)
+				time.Sleep(sleepTime)
+				main()
+			}
+			panic(err)
+		}
+	}()
 	go func() {
 		for {
-			// although it doesnt seem like much, it allows for good error loggin later on.
+			// although it doesnt seem like much, it allows for good error logging later on.
 			// Errors should only be passed to this stream if there is no other place, and
 			// a panic is not sutible
 			err := <-channels.Errors
@@ -24,10 +44,16 @@ func main() {
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")
-	cmd.LoadAll()
+	err := config.Init()
+	if err != nil {
+		panic(err)
+	}
 
 	// Dots to show progress, even though they mostly go all at once
 	// its a good measure of startup speed changing over time.
+	fmt.Print(".")
+	cmd.LoadAll()
+
 	fmt.Print(".")
 	cc, err := client.GetCollection()
 	if err != nil {

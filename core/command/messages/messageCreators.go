@@ -9,18 +9,18 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 	case *twitch.WhisperMessage:
 		return &Incoming{
 			Platform: Twitch,
-			Channel:  nil,
-			Message:  &v.Message,
-			User:     &v.User.Name,
+			Channel:  "",
+			Message:  v.Message,
+			User:     v.User.Name,
 			Raw:      (*twitch.Message)(&msg),
 			DMs:      true,
 		}
 	case *twitch.PrivateMessage:
 		return &Incoming{
 			Platform: Twitch,
-			Channel:  &v.Channel,
-			Message:  &v.Message,
-			User:     &v.User.Name,
+			Channel:  v.Channel,
+			Message:  v.Message,
+			User:     v.User.Name,
 			Raw:      (*twitch.Message)(&msg),
 		}
 	default:
@@ -35,16 +35,16 @@ func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 	if inMsg == nil {
 		return &Outgoing{
 			Platform:        Unknown,
-			Message:         &responce,
-			Channel:         nil,
-			User:            nil,
+			Message:         responce,
+			Channel:         "",
+			User:            "",
 			IncomingMessage: nil,
 			DM:              false,
 		}
 	}
 	return &Outgoing{
 		Platform:        inMsg.Platform,
-		Message:         &responce,
+		Message:         responce,
 		Channel:         inMsg.Channel,
 		User:            inMsg.User,
 		IncomingMessage: inMsg,
@@ -55,9 +55,9 @@ func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 func FakeOutgoing(channel, message string, platform PlatformType) *Outgoing {
 	return &Outgoing{
 		Platform:        platform,
-		Message:         &message,
-		Channel:         &channel,
-		User:            nil,
+		Message:         message,
+		Channel:         channel,
+		User:            "",
 		IncomingMessage: nil,
 	}
 }

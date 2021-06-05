@@ -1,13 +1,14 @@
 package cmd
 
 var (
-	githubCommand = Command{
+	githubCommand *Command = &Command{
 		Name: "github",
-		Execution: func(c *Context) (Return, error) {
-			return Return{
+		Execution: func(c *Context) (*Return, error) {
+			return &Return{
 				Success: true,
 				Reply:   "AlienPls For your \"research purposes\" https://github.com/NotNotQuinn/go-irc",
 			}, nil
 		},
+		Description: "Links to github, where the bot code is hosted.",
 	}
 )

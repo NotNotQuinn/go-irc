@@ -1,13 +1,19 @@
 {
-    "twitch": {
-        "channels": [
-            "turtoise",
-            "quinndt",
-            "supinic",
-            "jeffboys123"
-        ]
-    },
-    "global": {
-        "commandPrefix": "|"
-    }
+	"twitch": {
+		"channels": [
+			"turtoise",
+			"quinndt",
+			"supinic",
+			"jeffboys123",
+			"snappingbot",
+			"drtrihouse",
+			"daamj",
+			"alecbirdman"
+		]
+	},
+	"global": {
+		"commandPrefix": "|",
+		"admin_username": "quinndt",
+		"user_agent": "Twitch chat bot - Wanductbot created by quinndt"
+	}
 }
