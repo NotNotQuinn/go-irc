@@ -65,7 +65,8 @@ type Author struct {
 
 var (
 	gachiCommand *Command = &Command{
-		Name: "gachi",
+		Name:    "gachi",
+		Aliases: []string{"gh"},
 		Execution: func(c *Context) (*Return, error) {
 			errReturn := &Return{
 				Success: false,
@@ -96,7 +97,7 @@ var (
 				return errReturn, err
 			}
 			return &Return{
-				Reply:   fmt.Sprintf("HandsUp %s", Responce.Data.Data.Parsedlink),
+				Reply:   fmt.Sprintf("gachiGASM %s", Responce.Data.Data.Parsedlink),
 				Success: true,
 			}, nil
 		},
