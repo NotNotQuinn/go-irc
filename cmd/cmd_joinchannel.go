@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/NotNotQuinn/go-irc/client"
@@ -20,6 +21,14 @@ var joinCommand *Command = &Command{
 		}
 		channel = strings.TrimPrefix(channel, "#")
 		cc := client.Singleton
+		for _, ch := range config.Public.Twitch.Channels {
+			if ch == channel {
+				return &Return{
+					Reply:   fmt.Sprintf("Channel #%s already joined!", ch),
+					Success: false,
+				}, nil
+			}
+		}
 		config.Public.Twitch.Channels = append(config.Public.Twitch.Channels, channel)
 		success, err := config.Public.Save()
 		if err != nil {
