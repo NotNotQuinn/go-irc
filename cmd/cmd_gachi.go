@@ -81,7 +81,7 @@ var (
 			if err != nil {
 				return errReturn, err
 			}
-			var Responce APIresponse
+			var Response APIresponse
 			resp, err := client.Do(req)
 			if err != nil {
 				return errReturn, err
@@ -91,12 +91,12 @@ var (
 			if err != nil {
 				return errReturn, err
 			}
-			err = json.Unmarshal(b, &Responce)
+			err = json.Unmarshal(b, &Response)
 			if err != nil {
 				return errReturn, err
 			}
 			return &Return{
-				Reply:   fmt.Sprintf("gachiGASM %s", Responce.Data.Data.Parsedlink),
+				Reply:   fmt.Sprintf("gachiGASM %s", Response.Data.Data.Parsedlink),
 				Success: true,
 			}, nil
 		},
