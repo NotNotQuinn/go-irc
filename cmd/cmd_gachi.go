@@ -65,8 +65,7 @@ type Author struct {
 
 var (
 	gachiCommand *Command = &Command{
-		Name:    "gachi",
-		Aliases: []string{"gh"},
+		Name: "gachi",
 		Execution: func(c *Context) (*Return, error) {
 			errReturn := &Return{
 				Success: false,
