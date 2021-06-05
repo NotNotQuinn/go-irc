@@ -2,7 +2,8 @@ package cmd
 
 var (
 	githubCommand *Command = &Command{
-		Name: "github",
+		Name:    "github",
+		Aliases: []string{"gh"},
 		Execution: func(c *Context) (*Return, error) {
 			return &Return{
 				Success: true,
