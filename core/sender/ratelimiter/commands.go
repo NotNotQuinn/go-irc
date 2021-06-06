@@ -10,12 +10,12 @@ import (
 // Map layer 1 is channel, layer 2 is command, layer 3 is user
 var limits = make(map[string]map[string]map[string]chan bool)
 
-func CheckCommand(command *cmd.Command, channel string, user wbUser.User) bool {
+func CheckCommand(command *cmd.Command, channel string, user wbUser.IUser) bool {
 	initCommand(command, channel, user)
 	return len(limits[channel][command.Name][user.Name()]) != 0
 }
 
-func initCommand(command *cmd.Command, channel string, user wbUser.User) {
+func initCommand(command *cmd.Command, channel string, user wbUser.IUser) {
 	if limits[channel] == nil {
 		limits[channel] = make(map[string]map[string]chan bool)
 	}
@@ -29,7 +29,7 @@ func initCommand(command *cmd.Command, channel string, user wbUser.User) {
 	}
 }
 
-func IncrementCount(command *cmd.Command, channel string, user wbUser.User) {
+func IncrementCount(command *cmd.Command, channel string, user wbUser.IUser) {
 	initCommand(command, channel, user)
 	<-limits[channel][command.Name][user.Name()]
 	go func() {

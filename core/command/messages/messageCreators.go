@@ -58,7 +58,7 @@ func FakeOutgoing(channel, message string, platform PlatformType) *Outgoing {
 		Platform:        platform,
 		Message:         message,
 		Channel:         channel,
-		User:            "",
+		User:            wbUser.User(""),
 		IncomingMessage: nil,
 	}
 }

@@ -9,7 +9,7 @@ type Outgoing struct {
 	Platform        PlatformType
 	Message         string
 	Channel         string
-	User            wbUser.User
+	User            wbUser.IUser
 	DM              bool
 	IncomingMessage *Incoming
 }
@@ -18,7 +18,7 @@ type Incoming struct {
 	Platform PlatformType
 	Channel  string
 	Message  string
-	User     wbUser.User
+	User     wbUser.IUser
 	Raw      *twitch.Message
 	DMs      bool
 }
