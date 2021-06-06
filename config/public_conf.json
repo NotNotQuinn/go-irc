@@ -9,12 +9,15 @@
 			"daamj",
 			"alecbirdman",
 			"nimmy0",
-			"turtoise"
+			"turtoise",
+			"koobytv"
 		]
 	},
 	"global": {
 		"commandPrefix": "|",
-		"admin_username": "quinndt",
 		"user_agent": "Twitch chat bot - Wanductbot created by quinndt"
+	},
+	"users": {
+		"admins": ["quinndt"]
 	}
 }

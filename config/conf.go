@@ -13,18 +13,33 @@ var Public *PublicConfig
 var Private *PrivateConfig
 
 type PublicTwitchConfig struct {
-	Channels []string `json:"channels"`
+	Channels stringList `json:"channels"`
 }
 
 type PublicGlobalConfig struct {
-	CommandPrefix  string `json:"commandPrefix"`
-	Admin_Username string `json:"admin_username"`
-	UserAgent      string `json:"user_agent"`
+	CommandPrefix string `json:"commandPrefix"`
+	UserAgent     string `json:"user_agent"`
+}
+
+type PublicUsersConfig struct {
+	Admins stringList `json:"admins"`
+}
+
+type stringList []string
+
+func (l stringList) Inclues(query string) bool {
+	for _, item := range l {
+		if item == query {
+			return true
+		}
+	}
+	return false
 }
 
 type PublicConfig struct {
 	Twitch PublicTwitchConfig `json:"twitch"`
 	Global PublicGlobalConfig `json:"global"`
+	Users  PublicUsersConfig  `json:"users"`
 }
 
 func Init() error {

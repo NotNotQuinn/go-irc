@@ -27,7 +27,7 @@ func HandleAllSends(cc *client.ClientCollection) {
 			case messages.Twitch:
 				if msg.DM {
 					ratelimiter.AwaitSendWhisper()
-					cc.Twitch.Whisper(msg.User, msg.Message)
+					cc.Twitch.Whisper(msg.User.Name(), msg.Message)
 					return
 				}
 				ping := ""

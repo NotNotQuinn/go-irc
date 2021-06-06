@@ -1,6 +1,7 @@
 package messages
 
 import (
+	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
@@ -11,7 +12,7 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 			Platform: Twitch,
 			Channel:  "",
 			Message:  v.Message,
-			User:     v.User.Name,
+			User:     wbUser.User(v.User.Name),
 			Raw:      (*twitch.Message)(&msg),
 			DMs:      true,
 		}
@@ -20,7 +21,7 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 			Platform: Twitch,
 			Channel:  v.Channel,
 			Message:  v.Message,
-			User:     v.User.Name,
+			User:     wbUser.User(v.User.Name),
 			Raw:      (*twitch.Message)(&msg),
 		}
 	default:
@@ -37,7 +38,7 @@ func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 			Platform:        Unknown,
 			Message:         responce,
 			Channel:         "",
-			User:            "",
+			User:            wbUser.User(""),
 			IncomingMessage: nil,
 			DM:              false,
 		}

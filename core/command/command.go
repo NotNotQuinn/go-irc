@@ -35,7 +35,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 	if command.Whitelist != cmd.WL_none {
 		switch command.Whitelist {
 		case cmd.WL_adminOnly:
-			if inMsg.User != config.Public.Global.Admin_Username {
+			if !config.Public.Users.Admins.Inclues(inMsg.User.Name()) {
 				// Ignore
 				return nil
 			}
