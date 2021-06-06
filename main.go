@@ -72,7 +72,9 @@ func recoverFromDisconnect() {
 	if err := recover(); err != nil {
 		s := fmt.Sprint(err)
 		if strings.Contains(s, "no such host") && strings.Contains(s, "irc.chat.twitch.tv") {
-			if !(restartMult > 20) {
+			if !(restartMult >= 32) {
+				// will never exceed 32
+				// max amount of time waited is 8 mins (15 * 2^5 seconds)
 				restartMult *= 2
 			}
 			sleepTime := time.Second * 15 * time.Duration(restartMult)
