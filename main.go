@@ -40,7 +40,10 @@ func main() {
 	handlers.Handle(cc)
 
 	fmt.Print(".")
-	cc.JoinAll()
+	err = cc.JoinAll()
+	if err != nil {
+		panic(err)
+	}
 	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")
