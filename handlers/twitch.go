@@ -8,7 +8,7 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
-// Ataches all twitch handlers
+// Attaches all twitch handlers
 func TwitchAttach(client *twitch.Client) {
 	client.OnConnect(connected)
 	client.OnPrivateMessage(privmsg)

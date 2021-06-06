@@ -14,7 +14,7 @@ type Outgoing struct {
 	Channel string
 	// The user the message is directed at
 	User wbUser.IUser
-	// Weather the message should be sent privately
+	// Whether the message should be sent privately
 	DM bool
 	// The incoming message that invoked this outgoing message
 	IncomingMessage *Incoming
@@ -35,7 +35,7 @@ type Incoming struct {
 	DMs bool
 }
 
-// Platform type to seperate twitch from other platforms in the future
+// Platform type to separate twitch from other platforms in the future
 type PlatformType int
 
 const (
