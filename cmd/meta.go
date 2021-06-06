@@ -20,27 +20,47 @@ const NoCommandName = "__ LHLKJHDLKJHSDLKJSHDuhlkghI&#^GRITK#^RFGKbmf vkyfsmrg"
 
 // General structure of all commands
 type Command struct {
-	Name        string
-	Aliases     []string
-	Execution   func(*Context) (*Return, error)
-	onLoad      func() error
-	Data        DataType
-	Whitelist   Whitelist
+	// Name of the command.
+	//     // Default value
+	//     var cmd.NoCommandName string
+	Name string
+	// Alternate names to refer to the command
+	Aliases []string
+	// Function called when command executed.
+	// Default responds with nothing
+	Execution func(*Context) (*Return, error)
+	// Function called on load.
+	onLoad func() error
+	// Runtime data
+	Data DataType
+	// Whitelist type.
+	// Default none (0)
+	Whitelist Whitelist
+	// Description of command
 	Description string
-	Cooldown    time.Duration
+	// User cooldown.
+	// Default 5 seconds
+	Cooldown time.Duration
+	// Global channel cooldown.
+	// Default 2 seconds
+	GlobalCooldown time.Duration
 }
 
 // Context used to invoke commands
 type Context struct {
-	Incoming   messages.Incoming
-	Args       []string
+	// Incoming message
+	Incoming messages.Incoming
+	// Parsed message args
+	Args []string
+	// Alias/Name used to invoke command
 	Invocation string
 }
 
 // Data provided from a command execution
 type Return struct {
 	Success bool
-	Reply   string
+	// The message to reply with
+	Reply string
 }
 
 // The data type of commands, abstracted because it may change
@@ -93,6 +113,9 @@ func (cmd *Command) ensureDefaults() {
 	}
 	if cmd.Cooldown == 0 {
 		cmd.Cooldown = time.Second * 5
+	}
+	if cmd.GlobalCooldown == 0 {
+		cmd.GlobalCooldown = time.Second * 2
 	}
 }
 
