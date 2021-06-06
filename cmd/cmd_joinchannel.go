@@ -10,8 +10,18 @@ import (
 
 var joinCommand *Command = &Command{
 	Name:      "joinchannel",
+	Aliases:   []string{"partchannel"},
 	Whitelist: WL_adminOnly,
 	Execution: func(c *Context) (*Return, error) {
+		if len(c.Args) == 0 {
+			return &Return{
+				Reply: "Provide a channel in the form of #<channel> to part/join.",
+			}, nil
+		}
+		var part bool
+		if c.Invocation == "partchannel" {
+			part = true
+		}
 		channel := strings.ToLower(c.Args[0])
 		if !strings.HasPrefix(channel, "#") {
 			return &Return{
@@ -21,30 +31,69 @@ var joinCommand *Command = &Command{
 		}
 		channel = strings.TrimPrefix(channel, "#")
 		cc := client.Singleton
-		for _, ch := range config.Public.Twitch.Channels {
-			if ch == channel {
+		if part {
+			if !stringSliceContains(config.Public.Twitch.Channels, channel) {
 				return &Return{
-					Reply:   fmt.Sprintf("Channel #%s already joined!", ch),
 					Success: false,
+					Reply:   fmt.Sprintf("Channel #%s not joined!", channel),
+				}, nil
+			}
+		} else {
+			if stringSliceContains(config.Public.Twitch.Channels, channel) {
+				return &Return{
+					Success: false,
+					Reply:   fmt.Sprintf("Channel #%s already joined!", channel),
 				}, nil
 			}
 		}
-		config.Public.Twitch.Channels = append(config.Public.Twitch.Channels, channel)
+		if part {
+			var index int
+			for i, ch := range config.Public.Twitch.Channels {
+				if ch == channel {
+					index = i
+					break
+				}
+			}
+			config.Public.Twitch.Channels = remove(config.Public.Twitch.Channels, index)
+		} else {
+			config.Public.Twitch.Channels = append(config.Public.Twitch.Channels, channel)
+		}
 		success, err := config.Public.Save()
 		if err != nil {
 			return nil, err
 		}
 		if success {
-			cc.Twitch.Join(channel)
-			return &Return{
-				Success: true,
-				Reply:   "Joined #" + channel + ".",
-			}, nil
+			if part {
+				cc.Twitch.Depart(channel)
+				return &Return{
+					Success: true,
+					Reply:   "Parted #" + channel + ".",
+				}, nil
+			} else {
+				cc.Twitch.Join(channel)
+				return &Return{
+					Success: true,
+					Reply:   "Joined #" + channel + ".",
+				}, nil
+			}
 		}
 		return &Return{
 			Success: false,
-			Reply:   "Could not save #" + channel + " to config file, not joined.",
+			Reply:   "Could not add #" + channel + " to config file, not joined.",
 		}, nil
 	},
-	Description: "Joins a channel perminently.",
+	Description: "Joins or parts a channel perminently.",
+}
+
+func stringSliceContains(s []string, query string) bool {
+	for _, item := range s {
+		if item == query {
+			return true
+		}
+	}
+	return false
+}
+
+func remove(slice []string, index int) []string {
+	return append(slice[:index], slice[index+1:]...)
 }
