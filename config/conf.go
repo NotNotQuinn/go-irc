@@ -74,7 +74,10 @@ func getPublic() (*PublicConfig, error) {
 		return nil, err
 	}
 	var config PublicConfig
-	json.Unmarshal(bytes, &config)
+	err = json.Unmarshal(bytes, &config)
+	if err != nil {
+		return nil, err
+	}
 	return &config, nil
 }
 
@@ -85,7 +88,10 @@ func (conf *PublicConfig) Reload() error {
 		return err
 	}
 	var config PublicConfig
-	json.Unmarshal(bytes, &config)
+	err = json.Unmarshal(bytes, &config)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
