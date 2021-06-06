@@ -14,33 +14,9 @@ import (
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
 
-var restartMult = 1
-
 func main() {
-	defer func() {
-		if err := recover(); err != nil {
-			s := fmt.Sprint(err)
-			if strings.Contains(s, "no such host") && strings.Contains(s, "irc.chat.twitch.tv") {
-				if !(restartMult > 20) {
-					restartMult *= 2
-				}
-				sleepTime := time.Second * 15 * time.Duration(restartMult)
-				fmt.Println("\nConnection interupted, attempting restart in", sleepTime)
-				time.Sleep(sleepTime)
-				main()
-			}
-			panic(err)
-		}
-	}()
-	go func() {
-		for {
-			// although it doesnt seem like much, it allows for good error logging later on.
-			// Errors should only be passed to this stream if there is no other place, and
-			// a panic is not sutible
-			err := <-channels.Errors
-			fmt.Printf("Error: %+v\n", err)
-		}
-	}()
+	defer recoverFromDisconnect()
+	go handleErrors()
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")
@@ -70,6 +46,37 @@ func main() {
 	fmt.Print(".")
 	err = cc.Connect()
 	if err != nil {
+		panic(err)
+	}
+}
+
+// Handles all errors
+func handleErrors() {
+	for {
+		// although it doesnt seem like much, it allows for good error logging later on.
+		// Errors should only be passed to this stream if there is no other place, and
+		// a panic is not sutible
+		err := <-channels.Errors
+		fmt.Printf("Error: %+v\n", err)
+	}
+}
+
+// Increases as restart attempts increace in count
+var restartMult = 1
+
+// Attempts to recover from a disconnect, re-panics other errors
+func recoverFromDisconnect() {
+	if err := recover(); err != nil {
+		s := fmt.Sprint(err)
+		if strings.Contains(s, "no such host") && strings.Contains(s, "irc.chat.twitch.tv") {
+			if !(restartMult > 20) {
+				restartMult *= 2
+			}
+			sleepTime := time.Second * 15 * time.Duration(restartMult)
+			fmt.Println("\nConnection interupted, attempting restart in", sleepTime)
+			time.Sleep(sleepTime)
+			main()
+		}
 		panic(err)
 	}
 }

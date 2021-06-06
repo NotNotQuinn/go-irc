@@ -8,6 +8,7 @@ type ClientsHandled struct {
 	Twitch bool
 }
 
+// Attaches all clients and returns which were successfully handled
 func Handle(clients *client.ClientCollection) ClientsHandled {
 	var handled ClientsHandled
 

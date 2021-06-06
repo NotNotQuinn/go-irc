@@ -5,6 +5,7 @@ import "github.com/NotNotQuinn/go-irc/config"
 // A user
 type User string
 
+// A generic way to interact with a user
 type IUser interface {
 	GetPermissions() *Permissions
 	Name() string

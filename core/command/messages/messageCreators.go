@@ -5,6 +5,7 @@ import (
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
+// Create an incoming message from a twitch message
 func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 	switch v := msg.(type) {
 	case *twitch.WhisperMessage:
@@ -32,6 +33,7 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 	}
 }
 
+// Create an outgoing message from an incoming message, and a responce
 func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 	if inMsg == nil {
 		return &Outgoing{
@@ -53,6 +55,7 @@ func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 	}
 }
 
+// Create a fake outgoing message
 func FakeOutgoing(channel, message string, platform PlatformType) *Outgoing {
 	return &Outgoing{
 		Platform:        platform,

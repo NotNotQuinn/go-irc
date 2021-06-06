@@ -4,9 +4,13 @@ import "time"
 
 // Bool channels because they seem like they would use less memory
 
+// Records message rate limits of channels
 var channelLimits = make(map[string]chan bool)
+
+// Records whisper rate limits
 var whisperLimits = make(chan bool, 1)
 
+// Inits channels with data
 func Init() {
 	select {
 	case whisperLimits <- true:
@@ -14,7 +18,8 @@ func Init() {
 	}
 }
 
-func AwaitSendWhisper() {
+// Invokes whisper cooldown, waiting if not open
+func InvokeWhisper() {
 	<-whisperLimits
 	go func() {
 		time.Sleep(time.Second / 10 * 12)
@@ -22,7 +27,8 @@ func AwaitSendWhisper() {
 	}()
 }
 
-func AwaitSendMessage(channel string) {
+// Invokes message cooldown, waiting if not open
+func InvokeMessage(channel string) {
 	initChannel(channel)
 	// wait until the channels have something to continue
 	<-channelLimits[channel]
@@ -33,6 +39,7 @@ func AwaitSendMessage(channel string) {
 	}()
 }
 
+// Initilizes channel if not initilized
 func initChannel(channel string) {
 	if channelLimits[channel] == nil {
 		// Limit of 1 message at a time, no matter what

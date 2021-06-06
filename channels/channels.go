@@ -5,7 +5,9 @@ import (
 )
 
 var (
-	MessagesIN  = make(chan *messages.Incoming, 50)
+	// Messages coming from the platforms (twitch) should go through here to be handled
+	MessagesIN = make(chan *messages.Incoming, 50)
+	// Messages to be sent out should be sent through here to be properly disbatched
 	MessagesOUT = make(chan *messages.Outgoing, 50)
 	// Although it doesnt seem like much, it allows for good error loggin later on.
 	//
