@@ -39,7 +39,7 @@ func InvokeMessage(channel string) {
 	}()
 }
 
-// Initilizes channel if not initilized
+// Initializes channel if not initilized
 func initChannel(channel string) {
 	if channelLimits[channel] == nil {
 		// Limit of 1 message at a time, no matter what

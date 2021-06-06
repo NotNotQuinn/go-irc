@@ -10,7 +10,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
-// Handle all outgoing messages and disbatch them
+// Handle all outgoing messages and dispatch them
 func HandleAllSends(cc *client.ClientCollection) {
 	ratelimiter.Init()
 	for {
