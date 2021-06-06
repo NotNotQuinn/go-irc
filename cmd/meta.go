@@ -15,8 +15,10 @@ var (
 	CommandAliasMap map[string]string = make(map[string]string)
 )
 
+// Command name of commands that should never be invoked or do not have a name
 const NoCommandName = "__ LHLKJHDLKJHSDLKJSHDuhlkghI&#^GRITK#^RFGKbmf vkyfsmrg"
 
+// General structure of all commands
 type Command struct {
 	Name        string
 	Aliases     []string
@@ -28,19 +30,23 @@ type Command struct {
 	Cooldown    time.Duration
 }
 
+// Context used to invoke commands
 type Context struct {
 	Incoming   messages.Incoming
 	Args       []string
 	Invocation string
 }
 
+// Data provided from a command execution
 type Return struct {
 	Success bool
 	Reply   string
 }
 
+// The data type of commands, abstracted because it may change
 type DataType map[string]string
 
+// Convert the return data to an outgoing message in a context
 func (r *Return) ToOutgoing(ctx *Context) *messages.Outgoing {
 	return &messages.Outgoing{
 		Platform:        messages.Twitch,
@@ -100,13 +106,17 @@ func (cmd *Command) load() {
 	cmd.register()
 }
 
+// Command whitelist type
 type Whitelist int
 
 const (
-	WL_none      Whitelist = 0
-	WL_adminOnly Whitelist = 1
+	// No whitelist
+	WL_none Whitelist = iota
+	// Admins only
+	WL_adminOnly
 )
 
+// Get a command taking into account its aliases
 func GetCmd(name string) *Command {
 	command := Commands[name]
 	if command == nil {
@@ -115,6 +125,7 @@ func GetCmd(name string) *Command {
 	return command
 }
 
+// Loads all commands to be accessed from other places
 func LoadAll() {
 	pingCommand.load()
 	commandCommand.load()

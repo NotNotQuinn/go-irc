@@ -7,14 +7,16 @@ import (
 	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 )
 
-// Map layer 1 is channel, layer 2 is command, layer 3 is user
+// Used to store the state of rate limits with channel, command, and user.
 var limits = make(map[string]map[string]map[string]chan bool)
 
+// Check if a combination is currently on cooldown
 func CheckCommand(command *cmd.Command, channel string, user wbUser.IUser) bool {
 	initCommand(command, channel, user)
 	return len(limits[channel][command.Name][user.Name()]) != 0
 }
 
+// Ensures a command has a channel set up in the mapping
 func initCommand(command *cmd.Command, channel string, user wbUser.IUser) {
 	if limits[channel] == nil {
 		limits[channel] = make(map[string]map[string]chan bool)
@@ -29,7 +31,8 @@ func initCommand(command *cmd.Command, channel string, user wbUser.IUser) {
 	}
 }
 
-func IncrementCount(command *cmd.Command, channel string, user wbUser.IUser) {
+// Will invoke the cooldown, waiting if it isnt already open
+func InvokeCooldown(command *cmd.Command, channel string, user wbUser.IUser) {
 	initCommand(command, channel, user)
 	<-limits[channel][command.Name][user.Name()]
 	go func() {

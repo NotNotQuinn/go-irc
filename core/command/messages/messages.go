@@ -6,26 +6,41 @@ import (
 )
 
 type Outgoing struct {
-	Platform        PlatformType
-	Message         string
-	Channel         string
-	User            wbUser.IUser
-	DM              bool
+	// The platform to send the message on
+	Platform PlatformType
+	// The message text
+	Message string
+	// The channel to send the message to
+	Channel string
+	// The user the message is directed at
+	User wbUser.IUser
+	// Weather the message should be sent privately
+	DM bool
+	// The incoming message that invoked this outgoing message
 	IncomingMessage *Incoming
 }
 
 type Incoming struct {
+	// The platform the message was sent on
 	Platform PlatformType
-	Channel  string
-	Message  string
-	User     wbUser.IUser
-	Raw      *twitch.Message
-	DMs      bool
+	// The channel the message was sent in
+	Channel string
+	// The message text
+	Message string
+	// The user who sent the message
+	User wbUser.IUser
+	// The raw message
+	Raw *twitch.Message
+	// Whether the message was sent privately
+	DMs bool
 }
 
+// Platform type to seperate twitch from other platforms in the future
 type PlatformType int
 
 const (
+	// Platform is unknown - unable to work with data associated
 	Unknown PlatformType = -1
-	Twitch  PlatformType = 0
+	// Twitch platform
+	Twitch PlatformType = 0
 )

@@ -11,6 +11,7 @@ type ClientCollection struct {
 
 var Singleton *ClientCollection
 
+// Get the collection of clients
 func GetCollection() (cc *ClientCollection, err error) {
 	if Singleton != nil {
 		return Singleton, nil
@@ -24,11 +25,13 @@ func GetCollection() (cc *ClientCollection, err error) {
 	return Singleton, nil
 }
 
+// Join all channels that should be joined in all clients
 func (cc *ClientCollection) JoinAll() error {
 	cc.Twitch.Join(config.Public.Twitch.Channels...)
 	return nil
 }
 
+// Connect to all clients
 func (cc *ClientCollection) Connect() error {
 	return cc.Twitch.Connect()
 }

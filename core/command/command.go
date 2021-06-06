@@ -11,6 +11,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
+// Handles an incoming message, invoking a command if needed
 func HandleMessage(inMsg *messages.Incoming) error {
 	if inMsg == nil {
 		return nil
@@ -42,7 +43,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 		}
 	}
 	context := &cmd.Context{Incoming: *inMsg, Args: args, Invocation: commandName}
-	ratelimiter.IncrementCount(command, inMsg.Channel, inMsg.User)
+	ratelimiter.InvokeCooldown(command, inMsg.Channel, inMsg.User)
 	responce, err := command.Execution(context)
 	if responce != nil {
 		channels.MessagesOUT <- responce.ToOutgoing(context)
@@ -50,6 +51,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 	return err
 }
 
+// Prepares a message, seperating the arguments
 func prepareMessage(messageText string) ([]string, error) {
 	messageText = strings.Trim(messageText, " \t\n󠀀⠀")
 	if !strings.HasPrefix(messageText, config.Public.Global.CommandPrefix) {

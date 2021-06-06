@@ -10,6 +10,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
+// Handle all outgoing messages and disbatch them
 func HandleAllSends(cc *client.ClientCollection) {
 	ratelimiter.Init()
 	for {
@@ -26,7 +27,7 @@ func HandleAllSends(cc *client.ClientCollection) {
 			switch msg.Platform {
 			case messages.Twitch:
 				if msg.DM {
-					ratelimiter.AwaitSendWhisper()
+					ratelimiter.InvokeWhisper()
 					cc.Twitch.Whisper(msg.User.Name(), msg.Message)
 					return
 				}
@@ -34,7 +35,7 @@ func HandleAllSends(cc *client.ClientCollection) {
 				if msg.User.Name() != "" {
 					ping = fmt.Sprintf("@%s, ", msg.User)
 				}
-				ratelimiter.AwaitSendMessage(msg.Channel)
+				ratelimiter.InvokeMessage(msg.Channel)
 				cc.Twitch.Say(msg.Channel, fmt.Sprintf("%s%s", ping, msg.Message))
 			case messages.Unknown:
 				channels.Errors <- errors.New("platform set to 'unknown' for message, message not sent")

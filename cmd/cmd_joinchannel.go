@@ -85,6 +85,7 @@ var joinCommand *Command = &Command{
 	Description: "Joins or parts a channel perminently.",
 }
 
+// check if string slice contains an item
 func stringSliceContains(s []string, query string) bool {
 	for _, item := range s {
 		if item == query {
@@ -94,6 +95,7 @@ func stringSliceContains(s []string, query string) bool {
 	return false
 }
 
+// Removes an index from a string slice
 func remove(slice []string, index int) []string {
 	return append(slice[:index], slice[index+1:]...)
 }
