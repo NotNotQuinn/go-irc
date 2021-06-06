@@ -1,14 +1,15 @@
 {
 	"twitch": {
 		"channels": [
-			"turtoise",
 			"quinndt",
 			"supinic",
 			"jeffboys123",
 			"snappingbot",
 			"drtrihouse",
 			"daamj",
-			"alecbirdman"
+			"alecbirdman",
+			"nimmy0",
+			"turtoise"
 		]
 	},
 	"global": {
