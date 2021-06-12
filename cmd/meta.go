@@ -71,13 +71,12 @@ type DataType map[string]string
 // Convert the return data to an outgoing message in a context
 func (r *Return) ToOutgoing(ctx *Context) *messages.Outgoing {
 	return &messages.Outgoing{
-		Platform:        messages.Twitch,
-		Message:         r.Reply,
-		Channel:         ctx.Incoming.Channel,
-		User:            ctx.Incoming.User,
-		DM:              ctx.Incoming.DMs,
-		IncomingMessage: &ctx.Incoming,
-		NoFilter:        r.NoFilter,
+		Platform: messages.Twitch,
+		Message:  r.Reply,
+		Channel:  ctx.Incoming.Channel,
+		User:     ctx.Incoming.User,
+		DM:       ctx.Incoming.DMs,
+		NoFilter: r.NoFilter,
 	}
 }
 
