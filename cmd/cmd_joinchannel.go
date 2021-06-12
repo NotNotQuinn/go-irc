@@ -58,29 +58,34 @@ var joinCommand *Command = &Command{
 		} else {
 			config.Public.Twitch.Channels = append(config.Public.Twitch.Channels, channel)
 		}
-		success, err := config.Public.Save()
+		_, err := config.Public.Save()
 		if err != nil {
-			return nil, err
-		}
-		if success {
 			if part {
-				cc.Twitch.Depart(channel)
 				return &Return{
-					Success: true,
-					Reply:   "Parted #" + channel + ".",
-				}, nil
+					Success: false,
+					Reply:   "Could not remove #" + channel + " to config file, not parted.",
+				}, err
 			} else {
-				cc.Twitch.Join(channel)
 				return &Return{
-					Success: true,
-					Reply:   "Joined #" + channel + ".",
-				}, nil
+					Success: false,
+					Reply:   "Could not add #" + channel + " to config file, not joined.",
+				}, err
 			}
 		}
-		return &Return{
-			Success: false,
-			Reply:   "Could not add #" + channel + " to config file, not joined.",
-		}, nil
+
+		if part {
+			cc.Twitch.Depart(channel)
+			return &Return{
+				Success: true,
+				Reply:   "Parted #" + channel + ".",
+			}, nil
+		} else {
+			cc.Twitch.Join(channel)
+			return &Return{
+				Success: true,
+				Reply:   "Joined #" + channel + ".",
+			}, nil
+		}
 	},
 	Description: "Joins or parts a channel perminently.",
 }
