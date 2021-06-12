@@ -11,6 +11,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
+	wbDB "github.com/NotNotQuinn/go-irc/db"
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
 
@@ -20,13 +21,19 @@ func main() {
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")
-	err := config.Init()
+	err := wbDB.Init()
 	if err != nil {
 		panic(err)
 	}
 
 	// Dots to show progress, even though they mostly go all at once
 	// its a good measure of startup speed changing over time.
+	fmt.Print(".")
+	err = config.Init()
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Print(".")
 	cmd.LoadAll()
 
