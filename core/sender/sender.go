@@ -31,12 +31,8 @@ func HandleAllSends(cc *client.ClientCollection) {
 					cc.Twitch.Whisper(msg.User.Name(), msg.Message)
 					return
 				}
-				ping := ""
-				if msg.User.Name() != "" {
-					ping = fmt.Sprintf("@%s, ", msg.User)
-				}
 				ratelimiter.InvokeMessage(msg.Channel)
-				cc.Twitch.Say(msg.Channel, fmt.Sprintf("%s%s", ping, msg.Message))
+				cc.Twitch.Say(msg.Channel, msg.Message)
 			case messages.Unknown:
 				channels.Errors <- errors.New("platform set to 'unknown' for message, message not sent")
 			default:
