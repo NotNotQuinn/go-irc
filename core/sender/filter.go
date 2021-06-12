@@ -14,22 +14,24 @@ var lastMsgPerChannel = make(map[string]*messages.Outgoing)
 // Applies all filters to a message
 func handleFilterForMessage(msg *messages.Outgoing) *messages.Outgoing {
 
+	if msg.NoFilter {
+		return registerSameMessagAvoidence(msg)
+	}
+
 	// Mention users
-	if !msg.RawPrivmsg && !msg.DM && msg.User.Name() != "" {
+	if !msg.DM && msg.User.Name() != "" {
 		msg.Message = fmt.Sprintf("@%s, ", msg.User.Name()) + msg.Message
 	}
 
 	// Filter out commands
-	if !msg.RawPrivmsg {
-		cond, err := regexp.MatchString("^[\\.\\/]", msg.Message)
-		if err != nil {
-			channels.Errors <- fmt.Errorf("regex for irc command check failed: %w", err)
-			// asume match
-			cond = true
-		}
-		if cond {
-			msg.Message = ". " + msg.Message
-		}
+	cond, err := regexp.MatchString("^[\\.\\/]", msg.Message)
+	if err != nil {
+		channels.Errors <- fmt.Errorf("regex for irc command check failed: %w", err)
+		// assume match
+		cond = true
+	}
+	if cond {
+		msg.Message = ". " + msg.Message
 	}
 
 	return registerSameMessagAvoidence(msg)

@@ -9,9 +9,9 @@ var (
 		Description: "Sends the text provided to chat.",
 		Execution: func(c *Context) (*Return, error) {
 			return &Return{
-				Success:         true,
-				AllowIRCCommand: true,
-				Reply:           strings.Join(c.Args, " "),
+				Success:  true,
+				NoFilter: true,
+				Reply:    strings.Join(c.Args, " "),
 			}, nil
 		},
 	}

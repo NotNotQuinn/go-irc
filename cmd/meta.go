@@ -62,7 +62,7 @@ type Return struct {
 	// The message to reply with
 	Reply string
 	// Wheather to add additional
-	AllowIRCCommand bool
+	NoFilter bool
 }
 
 // The data type of commands, abstracted because it may change
@@ -77,7 +77,7 @@ func (r *Return) ToOutgoing(ctx *Context) *messages.Outgoing {
 		User:            ctx.Incoming.User,
 		DM:              ctx.Incoming.DMs,
 		IncomingMessage: &ctx.Incoming,
-		RawPrivmsg:      r.AllowIRCCommand,
+		NoFilter:        r.NoFilter,
 	}
 }
 
