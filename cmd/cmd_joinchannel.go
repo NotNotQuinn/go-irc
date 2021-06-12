@@ -63,7 +63,7 @@ var joinCommand *Command = &Command{
 			if part {
 				return &Return{
 					Success: false,
-					Reply:   "Could not remove #" + channel + " to config file, not parted.",
+					Reply:   "Could not remove #" + channel + " from config file, not parted.",
 				}, err
 			} else {
 				return &Return{
