@@ -1,9 +1,11 @@
+OUTFILE=bin/Wanductbot.exe
+
 build:
-	go build -o bin/bot.exe .
+	go build -o $(OUTFILE) .
 clean:
 	rm -rf bin/
 run: build
-	bin/bot.exe
+	$(OUTFILE)
 
 lint:
 # To install this lint tool
