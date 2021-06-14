@@ -71,7 +71,9 @@ func InitForTests(path string) error {
 	}
 	confFile = filepath.Join(confDir, "public_conf.json")
 	privConfPath = filepath.Join(confDir, "private_conf.json")
-	return Init()
+	// skip private - for automatic testing
+	Public, err = getPublic()
+	return err
 }
 
 // Load the configs and assign them to the variables
