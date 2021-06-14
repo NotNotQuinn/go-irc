@@ -62,3 +62,14 @@ func FakeOutgoing(channel, message string, platform PlatformType) *Outgoing {
 		User:     wbUser.User(""),
 	}
 }
+
+func FakeIncoming(channel, message string, user wbUser.User, DMs bool, platform PlatformType) *Incoming {
+	return &Incoming{
+		Platform: platform,
+		Channel:  channel,
+		Message:  message,
+		User:     user,
+		Raw:      nil,
+		DMs:      DMs,
+	}
+}

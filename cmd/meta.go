@@ -122,7 +122,7 @@ func (cmd *Command) ensureDefaults() {
 }
 
 // Loads a command and registers
-func (cmd *Command) load() {
+func (cmd *Command) Load() {
 	cmd.ensureDefaults()
 	err := cmd.onLoad()
 	if err != nil {
@@ -152,11 +152,11 @@ func GetCmd(name string) *Command {
 
 // Loads all commands to be accessed from other places
 func LoadAll() {
-	pingCommand.load()
-	commandCommand.load()
-	aboutCommand.load()
-	githubCommand.load()
-	joinCommand.load()
-	gachiCommand.load()
-	sayCommand.load()
+	pingCommand.Load()
+	commandCommand.Load()
+	aboutCommand.Load()
+	githubCommand.Load()
+	joinCommand.Load()
+	gachiCommand.Load()
+	sayCommand.Load()
 }
