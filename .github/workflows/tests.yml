@@ -19,4 +19,4 @@ jobs:
       - name: Get modules
         run: go get
       - name: Run tests
-        run: go test ./...
+        run: make test
