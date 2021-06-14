@@ -3,6 +3,7 @@ package command
 import (
 	"strings"
 
+	"github.com/NotNotQuinn/go-irc/channels"
 	cmd "github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
@@ -13,7 +14,11 @@ import (
 func HandleMessage(inMsg *messages.Incoming) error {
 	cmd, ctx := getCommandAndContext(inMsg)
 	if cmd != nil && ctx != nil {
-		//channels.MessagesOUT <- responce.ToOutgoing(context)
+		res, err := cmd.Execution(ctx)
+		channels.MessagesOUT <- res.ToOutgoing(ctx)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

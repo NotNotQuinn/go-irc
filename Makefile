@@ -1,5 +1,4 @@
 OUTFILE=bin/Wanductbot.exe
-TEST_OUTFILE=bin/Wanductbot.test.exe
 
 build:
 	go build -o $(OUTFILE) .
@@ -14,10 +13,11 @@ lint:
 #   https://golangci-lint.run/usage/install/
 	golangci-lint run ./...
 
-push: lint
+push: lint-test
 #   Hahahah, git in my makefile!
 	git push
 
 test:
-#	Needed because working directory is depended upon
 	go test ./...
+
+lint-test: lint test
