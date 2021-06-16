@@ -75,6 +75,7 @@ func TestHandleMessage(t *testing.T) {
 				t.Errorf("HandleMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
 			var res *messages.Outgoing
+			time.Sleep(time.Second / 100)
 			select {
 			case res = <-channels.MessagesOUT:
 			default:
