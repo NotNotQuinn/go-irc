@@ -1,12 +1,14 @@
 package command
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
-	cmd "github.com/NotNotQuinn/go-irc/cmd"
+	"github.com/NotNotQuinn/go-irc/channels"
+	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
@@ -26,20 +28,59 @@ func TestMain(m *testing.M) {
 }
 
 func TestHandleMessage(t *testing.T) {
+	var erroringCommand = &cmd.Command{
+		Name:    "erroring",
+		Aliases: []string{"err", "Error"},
+		Execution: func(c *cmd.Context) (*cmd.Return, error) {
+			if c.Args[0] == "lol" {
+				return &cmd.Return{
+					Success: true,
+					Reply:   "xd",
+				}, fmt.Errorf("generic error")
+			}
+			return nil, fmt.Errorf("generic error")
+		},
+	}
+	var workingCommand = &cmd.Command{
+		Name:    "working",
+		Aliases: []string{"Work"},
+		Execution: func(c *cmd.Context) (*cmd.Return, error) {
+			return &cmd.Return{
+				Success: true,
+				Reply:   "Hi!",
+			}, nil
+		},
+	}
+	erroringCommand.Load()
+	workingCommand.Load()
 	type args struct {
 		inMsg *messages.Incoming
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name         string
+		args         args
+		wantErr      bool
+		wantResponse bool
 	}{
-		// TODO: Add test cases.
+		{"nil inMsg", args{nil}, false, false},
+		{"normal message", args{messages.FakeIncoming("jtv", "Hi!", "quinndt", false, messages.Twitch)}, false, false},
+		{"working command", args{messages.FakeIncoming("jtv", "|working lol", "quinndt", false, messages.Twitch)}, false, true},
+		{"working command with alias", args{messages.FakeIncoming("jtv", "|Work lol", "quinndt", false, messages.Twitch)}, false, true},
+		{"erroring command with response", args{messages.FakeIncoming("jtv", "|Error lol xd", "quinndt", false, messages.Twitch)}, true, true},
+		{"erroring command without response", args{messages.FakeIncoming("jtv", "|Error xd", "quinndt", false, messages.Twitch)}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := HandleMessage(tt.args.inMsg); (err != nil) != tt.wantErr {
 				t.Errorf("HandleMessage() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			var res *messages.Outgoing
+			select {
+			case res = <-channels.MessagesOUT:
+			default:
+			}
+			if (res != nil) != tt.wantResponse {
+				t.Errorf("HandleMessage(); <-channels.MessagesOUT = %v, wantResponse %v", res, tt.wantResponse)
 			}
 		})
 	}

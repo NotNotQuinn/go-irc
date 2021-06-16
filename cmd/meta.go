@@ -37,6 +37,9 @@ type Return struct {
 
 // Convert the return data to an outgoing message in a context
 func (r *Return) ToOutgoing(ctx *Context) *messages.Outgoing {
+	if r == nil {
+		return nil
+	}
 	return &messages.Outgoing{
 		Platform: messages.Twitch,
 		Message:  r.Reply,
