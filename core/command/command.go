@@ -4,17 +4,36 @@ import (
 	"strings"
 
 	"github.com/NotNotQuinn/go-irc/channels"
-	cmd "github.com/NotNotQuinn/go-irc/cmd"
+	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
-// Handles an incoming message, invoking a command if needed
+// Handles an incoming message
+//
+// Will do the following if needed:
+//  * Execute commands
+//  * Respond to messages
+//  * Abort because of ratelimits
 func HandleMessage(inMsg *messages.Incoming) error {
-	cmd, ctx := getCommandAndContext(inMsg)
-	if cmd != nil && ctx != nil {
-		res, err := cmd.Execution(ctx)
+	ctx := GetContext(inMsg)
+	if ctx != nil && ctx.Command != nil {
+		// Handle command
+		if !ratelimiter.CheckCommand(ctx.Command, inMsg.Channel, inMsg.User) {
+			return nil
+		}
+		if ctx.Command.Whitelist != cmd.WL_none {
+			switch ctx.Command.Whitelist {
+			case cmd.WL_adminOnly:
+				if !config.Public.Users.Admins.Inclues(inMsg.User.Name()) {
+					// Ignore
+					return nil
+				}
+			}
+		}
+		ratelimiter.InvokeCooldown(ctx.Command, inMsg.Channel, inMsg.User)
+		res, err := ctx.Command.Execution(ctx)
 		channels.MessagesOUT <- res.ToOutgoing(ctx)
 		if err != nil {
 			return err
@@ -23,44 +42,28 @@ func HandleMessage(inMsg *messages.Incoming) error {
 	return nil
 }
 
-func getCommandAndContext(inMsg *messages.Incoming) (*cmd.Command, *cmd.Context) {
+func GetContext(inMsg *messages.Incoming) *cmd.Context {
 	if inMsg == nil {
-		return nil, nil
+		return nil
 	}
-	args := prepareMessage(inMsg.Message)
-	if len(args) == 0 {
-		return nil, nil
-	}
+
+	isCMD, args := prepareMessage(inMsg.Message)
 	commandName := args[0]
 	args = args[1:]
-
-	command := cmd.GetCmd(commandName)
-	if command == nil {
-		return nil, nil
+	context := &cmd.Context{Incoming: inMsg, Args: args, Invocation: commandName}
+	if isCMD {
+		context.Command = cmd.GetCmd(commandName)
 	}
-	if !ratelimiter.CheckCommand(command, inMsg.Channel, inMsg.User) {
-		return nil, nil
-	}
-	if command.Whitelist != cmd.WL_none {
-		switch command.Whitelist {
-		case cmd.WL_adminOnly:
-			if !config.Public.Users.Admins.Inclues(inMsg.User.Name()) {
-				// Ignore
-				return nil, nil
-			}
-		}
-	}
-	context := &cmd.Context{Incoming: *inMsg, Args: args, Invocation: commandName}
-	ratelimiter.InvokeCooldown(command, inMsg.Channel, inMsg.User)
-	return command, context
+	return context
 }
 
 // Prepares a message, seperating the arguments
-func prepareMessage(messageText string) []string {
+func prepareMessage(messageText string) (isCMD bool, args []string) {
 	messageText = strings.Trim(messageText, " \t\n󠀀⠀")
-	if !strings.HasPrefix(messageText, config.Public.Global.CommandPrefix) {
-		return []string{}
+	isCMD = false
+	if strings.HasPrefix(messageText, config.Public.Global.CommandPrefix) {
+		isCMD = true
 	}
-	args := strings.Split(strings.TrimPrefix(messageText, config.Public.Global.CommandPrefix), " ")
-	return args
+	args = strings.Split(strings.TrimPrefix(messageText, config.Public.Global.CommandPrefix), " ")
+	return isCMD, args
 }

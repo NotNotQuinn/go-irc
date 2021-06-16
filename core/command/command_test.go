@@ -45,7 +45,7 @@ func TestHandleMessage(t *testing.T) {
 	}
 }
 
-func Test_getCommandAndContext(t *testing.T) {
+func TestGetContext(t *testing.T) {
 	testCommand := &cmd.Command{
 		Execution: func(c *cmd.Context) (*cmd.Return, error) {
 			return nil, nil
@@ -65,58 +65,83 @@ func Test_getCommandAndContext(t *testing.T) {
 		inMsg *messages.Incoming
 	}
 	tests := []struct {
-		name  string
-		args  args
-		want  *cmd.Command
-		want1 *cmd.Context
+		name string
+		args args
+		want *cmd.Context
 	}{
-		{"empty everything", args{messages.FakeIncoming("", "", "", false, messages.Twitch)}, nil, nil},
-		{"no prefix", args{messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch)}, nil, nil},
-		{"prefix with no command", args{messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch)}, nil, nil},
+		{"nil msg", args{nil}, nil},
+		{
+			"empty everything", args{messages.FakeIncoming("", "", "", false, messages.Twitch)},
+			&cmd.Context{
+				Incoming:   messages.FakeIncoming("", "", "", false, messages.Twitch),
+				Args:       []string{},
+				Invocation: "",
+			},
+		},
+		{
+			"no prefix", args{messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch)},
+			&cmd.Context{
+				Incoming:   messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch),
+				Args:       []string{"im", "a", "big", "fan!"},
+				Invocation: "Hi",
+			},
+		},
+		{
+			"prefix with no command",
+			args{messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch)},
+			&cmd.Context{
+				Incoming:   messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch),
+				Args:       []string{},
+				Invocation: "",
+				Command:    nil,
+			},
+		},
 		{
 			"prefix with command",
 			args{messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch)},
-			testCommand,
 			&cmd.Context{
-				Incoming:   *messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch),
 				Args:       []string{},
 				Invocation: "testCMD",
+				Command:    testCommand,
 			},
 		},
 		{
 			"prefix with command and arguments",
 			args{messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch)},
-			testCommand,
 			&cmd.Context{
-				Incoming:   *messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch),
 				Args:       []string{"lol", "xd"},
 				Invocation: "testCMD",
+				Command:    testCommand,
 			},
 		},
 		{
 			"prefix with command using alias and arguments",
 			args{messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch)},
-			testCommand,
 			&cmd.Context{
-				Incoming:   *messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
 				Args:       []string{"AlienPls", "Les", "GOOOO"},
 				Invocation: "AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please",
+				Command:    testCommand,
 			},
 		},
 		{
 			"prefix with command using alias with wrong capitals",
 			args{messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch)},
-			nil, nil,
+			&cmd.Context{
+				Incoming:   messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
+				Args:       []string{"AlienPls", "Les", "GOOOO"},
+				Invocation: "AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please",
+				Command:    nil,
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := getCommandAndContext(tt.args.inMsg)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("getCommandAndContext() got = %v, want %v", got, tt.want)
-			}
-			if !reflect.DeepEqual(got1, tt.want1) {
-				t.Errorf("getCommandAndContext() got1 = %v, want %v", got1, tt.want1)
+			ctx := GetContext(tt.args.inMsg)
+			if !reflect.DeepEqual(ctx, tt.want) {
+				t.Errorf("getContext() = %v, want %v", ctx, tt.want)
 			}
 		})
 	}
@@ -127,22 +152,29 @@ func Test_prepareMessage(t *testing.T) {
 		messageText string
 	}
 	tests := []struct {
-		name string
-		args args
-		want []string
+		name       string
+		args       args
+		want_args  []string
+		want_isCMD bool
 	}{
-		{"empty", args{""}, []string{}},
-		{"no prefix", args{"Hi !!!"}, []string{}},
-		{"prefix but no text", args{config.Public.Global.CommandPrefix}, []string{""}},
-		{"prefix + cmd and 2 other arguments", args{"|testCMD lol xd"}, []string{"testCMD", "lol", "xd"}},
-		{"prefix and one word", args{config.Public.Global.CommandPrefix + "yourm0M"}, []string{"yourm0M"}},
-		{"prefix and multiple arguments", args{config.Public.Global.CommandPrefix + "help help FeelsDankMan how does this work?"}, []string{"help", "help", "FeelsDankMan", "how", "does", "this", "work?"}},
-		{"prefix character in middle", args{"My favorite textual character(s) in the universe is '" + config.Public.Global.CommandPrefix + "'! PogChamp"}, []string{}},
+		{"empty", args{""}, []string{""}, false},
+		{"no prefix", args{"Hi !!!"}, []string{"Hi", "!!!"}, false},
+		{"prefix but no text", args{config.Public.Global.CommandPrefix}, []string{""}, true},
+		{"prefix + cmd and 2 other arguments", args{"|testCMD lol xd"}, []string{"testCMD", "lol", "xd"}, true},
+		{"prefix and one word", args{config.Public.Global.CommandPrefix + "yourm0M"}, []string{"yourm0M"}, true},
+		{"prefix and multiple arguments", args{config.Public.Global.CommandPrefix + "help help FeelsDankMan how does this work?"}, []string{"help", "help", "FeelsDankMan", "how", "does", "this", "work?"}, true},
+		{"prefix character in middle", args{"My favorite textual character(s) in the universe is '" + config.Public.Global.CommandPrefix + "'! PogChamp"}, []string{
+			"My", "favorite", "textual", "character(s)", "in", "the", "universe", "is", "'" + config.Public.Global.CommandPrefix + "'!", "PogChamp",
+		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := prepareMessage(tt.args.messageText); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("prepareMessage() = %v, want %v", got, tt.want)
+			isCMD, args := prepareMessage(tt.args.messageText)
+			if !reflect.DeepEqual(args, tt.want_args) {
+				t.Errorf("prepareMessage() args = %v, want %v", args, tt.want_args)
+			}
+			if !reflect.DeepEqual(isCMD, tt.want_isCMD) {
+				t.Errorf("prepareMessage() isCMD = %v, want %v", isCMD, tt.want_isCMD)
 			}
 		})
 	}
