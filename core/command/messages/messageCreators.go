@@ -7,6 +7,9 @@ import (
 
 // Create an incoming message from a twitch message
 func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
+	if msg == nil {
+		return nil
+	}
 	switch v := msg.(type) {
 	case *twitch.WhisperMessage:
 		return &Incoming{
@@ -36,13 +39,7 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 // Create an outgoing message from an incoming message, and a responce
 func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 	if inMsg == nil {
-		return &Outgoing{
-			Platform: Unknown,
-			Message:  responce,
-			Channel:  "",
-			User:     wbUser.User(""),
-			DM:       false,
-		}
+		return nil
 	}
 	return &Outgoing{
 		Platform: inMsg.Platform,
