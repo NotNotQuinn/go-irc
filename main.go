@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -11,7 +12,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
-	wbDB "github.com/NotNotQuinn/go-irc/db"
+	"github.com/NotNotQuinn/go-irc/data"
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
 
@@ -21,7 +22,7 @@ func main() {
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")
-	err := wbDB.Init()
+	err := data.Init()
 	if err != nil {
 		panic(err)
 	}
@@ -44,14 +45,17 @@ func main() {
 	}
 
 	fmt.Print(".")
-	handlers.Handle(cc)
+	handled := handlers.Handle(cc)
+	if !handled.Twitch {
+		panic(errors.New("twitch handlers not initilized"))
+	}
+	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")
 	err = cc.JoinAll()
 	if err != nil {
 		panic(err)
 	}
-	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")
 	err = cc.Connect()

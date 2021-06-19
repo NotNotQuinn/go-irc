@@ -1,4 +1,4 @@
-package wbDB
+package data
 
 import (
 	"database/sql"
@@ -46,8 +46,4 @@ func Init() error {
 	// Some drivers may not create a connection initally, this verifies that the connection is alive
 	err = coreDB.Ping()
 	return err
-}
-
-func Get() (exists bool, coreDB *sql.DB) {
-	return coreDB != nil, coreDB
 }
