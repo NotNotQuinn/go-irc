@@ -15,10 +15,28 @@ var limits = make(map[string]map[string]map[string]chan bool)
 // Cooldowns will be shorter in this limiter
 var channelCommandLimit = make(map[string]map[string]chan bool)
 
+// Wheather command cooldowns are enabled.
+//
+// If false, every check to cooldowns involving commands will return true
+// Additionally every invocation of a cooldown will return imediately.
+var commandCooldownEnabled bool = true
+
 // Check if a combination is currently on cooldown
 func CheckCommand(command *cmd.Command, channel string, user wbUser.IUser) bool {
+	if !commandCooldownEnabled {
+		return true
+	}
 	initCommand(command, channel, user)
 	return len(limits[channel][command.Name][user.Name()]) != 0 && checkCommandChannelGlobal(command, channel)
+}
+
+// Ignores all command ratelimits - sending message ratelimits still apply
+//
+// To stop ignoring ratelimits simply close the `stop` channel
+func IgnoreAllCommandLimits(stop <-chan bool) {
+	commandCooldownEnabled = false
+	<-stop
+	commandCooldownEnabled = true
 }
 
 // Ensures a command has a channel set up in the mapping
@@ -50,6 +68,9 @@ func initCommandChannelGlobal(command *cmd.Command, channel string) {
 
 // Will invoke the cooldown, waiting if it isnt already open
 func InvokeCooldown(command *cmd.Command, channel string, user wbUser.IUser) {
+	if !commandCooldownEnabled {
+		return
+	}
 	initCommand(command, channel, user)
 	<-channelCommandLimit[channel][command.Name]
 	<-limits[channel][command.Name][user.Name()]
@@ -65,6 +86,9 @@ func InvokeCooldown(command *cmd.Command, channel string, user wbUser.IUser) {
 
 // check command channel global cooldown
 func checkCommandChannelGlobal(command *cmd.Command, channel string) bool {
+	if !commandCooldownEnabled {
+		return true
+	}
 	initCommandChannelGlobal(command, channel)
 	return len(channelCommandLimit[channel][command.Name]) != 0
 }

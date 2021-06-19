@@ -16,8 +16,10 @@ type Outgoing struct {
 	User wbUser.IUser
 	// Whether the message should be sent privately
 	DM bool
-	// The incoming message that invoked this outgoing message
-	IncomingMessage *Incoming
+	// Note: If more of fields of the below nature are added it may be benifitial to change to ENUM slice based flags
+
+	// Weather to add aditional characters at the beginning of the message
+	NoFilter bool
 }
 
 type Incoming struct {

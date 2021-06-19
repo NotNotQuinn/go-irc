@@ -1,16 +1,23 @@
+OUTFILE=bin/Wanductbot.exe
+
 build:
-	go build -o bin/bot.exe .
+	go build -o $(OUTFILE) .
 clean:
 	rm -rf bin/
 run: build
-	bin/bot.exe
+	$(OUTFILE)
 
 lint:
-# To install this lint tool
-# See this for your operating system
-# https://golangci-lint.run/usage/install/
+#   To install this lint tool
+#   See this for your operating system
+#   https://golangci-lint.run/usage/install/
 	golangci-lint run ./...
 
-push: lint
-# Hahahah, git in my makefile!
+push: lint-test
+#   Hahahah, git in my makefile!
 	git push
+
+test:
+	go test ./...
+
+lint-test: lint test

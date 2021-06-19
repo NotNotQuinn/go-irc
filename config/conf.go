@@ -6,10 +6,13 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
-// Config file to read from
-var confFile = "./config/public_conf.json"
+// Directory to look for config files
+var confDir = "./config"
+var confFile = filepath.Join(confDir, "public_conf.json")
+var privConfPath = filepath.Join(confDir, "private_conf.json")
 
 // Public config data
 var Public *PublicConfig
@@ -53,6 +56,26 @@ type PublicConfig struct {
 	Users  PublicUsersConfig  `json:"users"`
 }
 
+// Should be used to init for a test
+//
+// Path is a path from the module directory to the config directory.
+// As this changes for every module it makes sense to pass this data.
+func InitForTests(path string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	confDir, err = filepath.Abs(filepath.Join(cwd, path))
+	if err != nil {
+		return err
+	}
+	confFile = filepath.Join(confDir, "public_conf.json")
+	privConfPath = filepath.Join(confDir, "private_conf.json")
+	// skip private - for automatic testing
+	Public, err = getPublic()
+	return err
+}
+
 // Load the configs and assign them to the variables
 func Init() error {
 	var err error
@@ -69,7 +92,11 @@ func Init() error {
 
 // Load and return the public config
 func getPublic() (*PublicConfig, error) {
-	bytes, err := ioutil.ReadFile(confFile)
+	path, err := filepath.Abs(confFile)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +110,11 @@ func getPublic() (*PublicConfig, error) {
 
 // Reload the config from file
 func (conf *PublicConfig) Reload() error {
-	bytes, err := ioutil.ReadFile(confFile)
+	path, err := filepath.Abs(confFile)
+	if err != nil {
+		return err
+	}
+	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -101,7 +132,11 @@ func (conf *PublicConfig) Save() (success bool, err error) {
 	if err != nil {
 		return false, err
 	}
-	file, err := os.Create(confFile)
+	path, err := filepath.Abs(confFile)
+	if err != nil {
+		return false, err
+	}
+	file, err := os.Create(path)
 	if err != nil {
 		return false, err
 	}
@@ -115,7 +150,7 @@ func (conf *PublicConfig) Save() (success bool, err error) {
 	if err != nil {
 		return true, err
 	}
-	err = ioutil.WriteFile(confFile, bytes, fs.ModeType)
+	err = ioutil.WriteFile(path, bytes, fs.ModeType)
 	return true, err
 }
 
@@ -131,7 +166,11 @@ type PrivateConfig struct {
 
 // Load and return private config
 func getPrivate() (conf *PrivateConfig, err error) {
-	bytes, err := ioutil.ReadFile("./config/private_conf.json")
+	path, err := filepath.Abs(privConfPath)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

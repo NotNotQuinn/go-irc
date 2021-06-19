@@ -16,6 +16,9 @@ import (
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
 
+// The last time the bot started successfully
+var lastSuccessfulRestart time.Time
+
 func main() {
 	defer recoverFromDisconnect()
 	go handleErrors()
@@ -62,6 +65,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	lastSuccessfulRestart = time.Now()
 }
 
 // Handles all errors
@@ -78,11 +82,17 @@ func handleErrors() {
 // Increases as restart attempts increace in count
 var restartMult = 1
 
+// Max ammount of time since last restart to accept the restartMult
+const maxLastRestart = time.Minute * 5
+
 // Attempts to recover from a disconnect, re-panics other errors
 func recoverFromDisconnect() {
 	if err := recover(); err != nil {
 		s := fmt.Sprint(err)
 		if strings.Contains(s, "no such host") && strings.Contains(s, "irc.chat.twitch.tv") {
+			if time.Since(lastSuccessfulRestart) > maxLastRestart {
+				restartMult = 1
+			}
 			if !(restartMult >= 32) {
 				// will never exceed 32
 				// max amount of time waited is 8 mins (15 * 2^5 seconds)
@@ -91,8 +101,10 @@ func recoverFromDisconnect() {
 			sleepTime := time.Second * 15 * time.Duration(restartMult)
 			fmt.Println("\nConnection interupted, attempting restart in", sleepTime)
 			time.Sleep(sleepTime)
+			// I dont know what the best option would be to restart main - this is all I could come up with
+			// Stack could overflow
 			main()
 		}
-		panic(err)
+		panic(fmt.Errorf("%w", err))
 	}
 }

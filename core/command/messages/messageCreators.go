@@ -7,6 +7,9 @@ import (
 
 // Create an incoming message from a twitch message
 func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
+	if msg == nil {
+		return nil
+	}
 	switch v := msg.(type) {
 	case *twitch.WhisperMessage:
 		return &Incoming{
@@ -36,32 +39,34 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 // Create an outgoing message from an incoming message, and a responce
 func NewOutgoing(inMsg *Incoming, responce string) *Outgoing {
 	if inMsg == nil {
-		return &Outgoing{
-			Platform:        Unknown,
-			Message:         responce,
-			Channel:         "",
-			User:            wbUser.User(""),
-			IncomingMessage: nil,
-			DM:              false,
-		}
+		return nil
 	}
 	return &Outgoing{
-		Platform:        inMsg.Platform,
-		Message:         responce,
-		Channel:         inMsg.Channel,
-		User:            inMsg.User,
-		IncomingMessage: inMsg,
-		DM:              inMsg.DMs,
+		Platform: inMsg.Platform,
+		Message:  responce,
+		Channel:  inMsg.Channel,
+		User:     inMsg.User,
+		DM:       inMsg.DMs,
 	}
 }
 
 // Create a fake outgoing message
 func FakeOutgoing(channel, message string, platform PlatformType) *Outgoing {
 	return &Outgoing{
-		Platform:        platform,
-		Message:         message,
-		Channel:         channel,
-		User:            wbUser.User(""),
-		IncomingMessage: nil,
+		Platform: platform,
+		Message:  message,
+		Channel:  channel,
+		User:     wbUser.User(""),
+	}
+}
+
+func FakeIncoming(channel, message string, user wbUser.User, DMs bool, platform PlatformType) *Incoming {
+	return &Incoming{
+		Platform: platform,
+		Channel:  channel,
+		Message:  message,
+		User:     user,
+		Raw:      nil,
+		DMs:      DMs,
 	}
 }
