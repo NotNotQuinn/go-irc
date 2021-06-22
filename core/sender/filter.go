@@ -19,8 +19,8 @@ func handleFilterForMessage(msg *messages.Outgoing) *messages.Outgoing {
 	}
 
 	// Mention users
-	if !msg.DM && msg.User.Name() != "" {
-		msg.Message = fmt.Sprintf("@%s, ", msg.User.Name()) + msg.Message
+	if !msg.DM && msg.User.Name != "" {
+		msg.Message = fmt.Sprintf("@%s, ", msg.User.Name) + msg.Message
 	}
 
 	// Filter out commands

@@ -21,7 +21,7 @@ func TestCheckCommand(t *testing.T) {
 	type args struct {
 		command *cmd.Command
 		channel string
-		user    wbUser.IUser
+		user    wbUser.User
 	}
 	tests := []struct {
 		name string
@@ -60,24 +60,24 @@ func Test_initCommand(t *testing.T) {
 	type args struct {
 		command *cmd.Command
 		channel string
-		user    wbUser.IUser
+		user    wbUser.User
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"New case", args{&cmd.Command{Name: "CMDname"}, "jtv", wbUser.User("yourmom")}},
-		{"Command name already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.User("yourm0m")}},
-		{"Command name and channel already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.User("yourmother")}},
-		{"Duplicate case", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.User("yourmother")}},
-		{"New case", args{&cmd.Command{Name: "OtherCommand"}, "quinndt", wbUser.User("quinndt")}},
+		{"New case", args{&cmd.Command{Name: "CMDname"}, "jtv", wbUser.FakeUser("yourmom")}},
+		{"Command name already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.FakeUser("yourm0m")}},
+		{"Command name and channel already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.FakeUser("yourmother")}},
+		{"Duplicate case", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.FakeUser("yourmother")}},
+		{"New case", args{&cmd.Command{Name: "OtherCommand"}, "quinndt", wbUser.FakeUser("quinndt")}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			initCommand(tt.args.command, tt.args.channel, tt.args.user)
 			if limits[tt.args.channel] == nil ||
 				limits[tt.args.channel][tt.args.command.Name] == nil ||
-				limits[tt.args.channel][tt.args.command.Name][tt.args.user.Name()] == nil {
+				limits[tt.args.channel][tt.args.command.Name][tt.args.user.Name] == nil {
 
 				t.Errorf("initCommand() did not initilize the mapping.")
 			}
@@ -107,7 +107,7 @@ func TestInvokeCooldown(t *testing.T) {
 	type args struct {
 		command *cmd.Command
 		channel string
-		user    wbUser.IUser
+		user    wbUser.User
 	}
 	tests := []struct {
 		name string

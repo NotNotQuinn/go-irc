@@ -26,7 +26,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 		if ctx.Command.Whitelist != cmd.WL_none {
 			switch ctx.Command.Whitelist {
 			case cmd.WL_adminOnly:
-				if !config.Public.Users.Admins.Inclues(inMsg.User.Name()) {
+				if !config.Public.Users.Admins.Inclues(inMsg.User.Name) {
 					// Ignore
 					return nil
 				}
@@ -50,7 +50,7 @@ func GetContext(inMsg *messages.Incoming) *cmd.Context {
 	isCMD, args := prepareMessage(inMsg.Message)
 	commandName := args[0]
 	args = args[1:]
-	context := &cmd.Context{Incoming: inMsg, Args: args, Invocation: commandName}
+	context := &cmd.Context{Incoming: inMsg, Args: args, Invocation: commandName, User: &inMsg.User}
 	if isCMD {
 		context.Command = cmd.GetCmd(commandName)
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
+	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 )
 
 func TestMain(m *testing.M) {
@@ -63,11 +64,11 @@ func TestHandleMessage(t *testing.T) {
 		wantResponse bool
 	}{
 		{"nil inMsg", args{nil}, false, false},
-		{"normal message", args{messages.FakeIncoming("jtv", "Hi!", "quinndt", false, messages.Twitch)}, false, false},
-		{"working command", args{messages.FakeIncoming("jtv", "|working lol", "quinndt", false, messages.Twitch)}, false, true},
-		{"working command with alias", args{messages.FakeIncoming("jtv", "|Work lol", "quinndt", false, messages.Twitch)}, false, true},
-		{"erroring command with response", args{messages.FakeIncoming("jtv", "|Error lol xd", "quinndt", false, messages.Twitch)}, true, true},
-		{"erroring command without response", args{messages.FakeIncoming("jtv", "|Error xd", "quinndt", false, messages.Twitch)}, true, false},
+		{"normal message", args{messages.FakeIncoming("jtv", "Hi!", wbUser.FakeUser("quinndt"), false, messages.Twitch)}, false, false},
+		{"working command", args{messages.FakeIncoming("jtv", "|working lol", wbUser.FakeUser("quinndt"), false, messages.Twitch)}, false, true},
+		{"working command with alias", args{messages.FakeIncoming("jtv", "|Work lol", wbUser.FakeUser("quinndt"), false, messages.Twitch)}, false, true},
+		{"erroring command with response", args{messages.FakeIncoming("jtv", "|Error lol xd", wbUser.FakeUser("quinndt"), false, messages.Twitch)}, true, true},
+		{"erroring command without response", args{messages.FakeIncoming("jtv", "|Error xd", wbUser.FakeUser("quinndt"), false, messages.Twitch)}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -113,26 +114,26 @@ func TestGetContext(t *testing.T) {
 	}{
 		{"nil msg", args{nil}, nil},
 		{
-			"empty everything", args{messages.FakeIncoming("", "", "", false, messages.Twitch)},
+			"empty everything", args{messages.FakeIncoming("", "", wbUser.FakeUser(""), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("", "", "", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("", "", wbUser.FakeUser(""), false, messages.Twitch),
 				Args:       []string{},
 				Invocation: "",
 			},
 		},
 		{
-			"no prefix", args{messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch)},
+			"no prefix", args{messages.FakeIncoming("jtv", "Hi im a big fan!", wbUser.FakeUser("justinfan123"), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("jtv", "Hi im a big fan!", wbUser.FakeUser("justinfan123"), false, messages.Twitch),
 				Args:       []string{"im", "a", "big", "fan!"},
 				Invocation: "Hi",
 			},
 		},
 		{
 			"prefix with no command",
-			args{messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch)},
+			args{messages.FakeIncoming("jtv", "|", wbUser.FakeUser("justinfan123"), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("jtv", "|", wbUser.FakeUser("justinfan123"), false, messages.Twitch),
 				Args:       []string{},
 				Invocation: "",
 				Command:    nil,
@@ -140,9 +141,9 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command",
-			args{messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch)},
+			args{messages.FakeIncoming("jtv", "|testCMD", wbUser.FakeUser("justinfan123"), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("jtv", "|testCMD", wbUser.FakeUser("justinfan123"), false, messages.Twitch),
 				Args:       []string{},
 				Invocation: "testCMD",
 				Command:    testCommand,
@@ -150,9 +151,9 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command and arguments",
-			args{messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch)},
+			args{messages.FakeIncoming("jtv", "|testCMD lol xd", wbUser.FakeUser("justinfan123"), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("jtv", "|testCMD lol xd", wbUser.FakeUser("justinfan123"), false, messages.Twitch),
 				Args:       []string{"lol", "xd"},
 				Invocation: "testCMD",
 				Command:    testCommand,
@@ -160,9 +161,9 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command using alias and arguments",
-			args{messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch)},
+			args{messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", wbUser.FakeUser("AlienFAn"), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", wbUser.FakeUser("AlienFAn"), false, messages.Twitch),
 				Args:       []string{"AlienPls", "Les", "GOOOO"},
 				Invocation: "AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please",
 				Command:    testCommand,
@@ -170,9 +171,9 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command using alias with wrong capitals",
-			args{messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch)},
+			args{messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", wbUser.FakeUser("AlienFAn"), false, messages.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
+				Incoming:   messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", wbUser.FakeUser("AlienFAn"), false, messages.Twitch),
 				Args:       []string{"AlienPls", "Les", "GOOOO"},
 				Invocation: "AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please",
 				Command:    nil,

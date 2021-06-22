@@ -28,7 +28,7 @@ func HandleAllSends(cc *client.ClientCollection) {
 			case messages.Twitch:
 				if msg.DM {
 					ratelimiter.InvokeWhisper()
-					cc.Twitch.Whisper(msg.User.Name(), msg.Message)
+					cc.Twitch.Whisper(msg.User.Name, msg.Message)
 					return
 				}
 				ratelimiter.InvokeMessage(msg.Channel)

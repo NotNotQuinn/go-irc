@@ -12,6 +12,7 @@ import (
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
+	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 	"github.com/NotNotQuinn/go-irc/data"
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
@@ -25,7 +26,7 @@ func main() {
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")
-	err := data.Init()
+	err := config.Init()
 	if err != nil {
 		panic(err)
 	}
@@ -33,11 +34,10 @@ func main() {
 	// Dots to show progress, even though they mostly go all at once
 	// its a good measure of startup speed changing over time.
 	fmt.Print(".")
-	err = config.Init()
+	err = data.Init()
 	if err != nil {
 		panic(err)
 	}
-
 	fmt.Print(".")
 	cmd.LoadAll()
 
@@ -59,6 +59,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	user, err := wbUser.GetUser("urmom", 0)
+	fmt.Printf("wbUser.GetUser(\"quinndt\", 0): %v, %v\n", user, err)
 
 	fmt.Print(".")
 	err = cc.Connect()
@@ -103,6 +105,7 @@ func recoverFromDisconnect() {
 			time.Sleep(sleepTime)
 			// I dont know what the best option would be to restart main - this is all I could come up with
 			// Stack could overflow
+			defer recoverFromDisconnect()
 			main()
 		}
 		panic(fmt.Errorf("%w", err))

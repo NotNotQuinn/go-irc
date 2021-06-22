@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/NotNotQuinn/go-irc/core/command/messages"
+	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 )
 
 // Context used to invoke commands
@@ -14,6 +15,8 @@ type Context struct {
 	Invocation string
 	// Command that is invoked
 	Command *Command
+	// User who invoked this command
+	User *wbUser.User
 }
 
 // Command whitelist type
@@ -31,7 +34,7 @@ type Return struct {
 	Success bool
 	// The message to reply with
 	Reply string
-	// Wheather to add additional
+	// Ignore all filtering
 	NoFilter bool
 }
 
