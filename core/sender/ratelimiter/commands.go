@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/NotNotQuinn/go-irc/cmd"
-	wbUser "github.com/NotNotQuinn/go-irc/core/user"
+	"github.com/NotNotQuinn/go-irc/core"
 )
 
 // Used to store the state of rate limits with channel, command, and user.
@@ -22,7 +22,7 @@ var channelCommandLimit = make(map[string]map[string]chan bool)
 var commandCooldownEnabled bool = true
 
 // Check if a combination is currently on cooldown
-func CheckCommand(command *cmd.Command, channel string, user wbUser.User) bool {
+func CheckCommand(command *cmd.Command, channel string, user core.User) bool {
 	if !commandCooldownEnabled {
 		return true
 	}
@@ -40,7 +40,7 @@ func IgnoreAllCommandLimits(stop <-chan bool) {
 }
 
 // Ensures a command has a channel set up in the mapping
-func initCommand(command *cmd.Command, channel string, user wbUser.User) {
+func initCommand(command *cmd.Command, channel string, user core.User) {
 	if limits[channel] == nil {
 		limits[channel] = make(map[string]map[string]chan bool)
 	}
@@ -67,7 +67,7 @@ func initCommandChannelGlobal(command *cmd.Command, channel string) {
 }
 
 // Will invoke the cooldown, waiting if it isnt already open
-func InvokeCooldown(command *cmd.Command, channel string, user wbUser.User) {
+func InvokeCooldown(command *cmd.Command, channel string, user core.User) {
 	if !commandCooldownEnabled {
 		return
 	}

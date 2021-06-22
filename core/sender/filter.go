@@ -4,15 +4,14 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/NotNotQuinn/go-irc/channels"
-	"github.com/NotNotQuinn/go-irc/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core"
 )
 
 // Records the last message sent from us in every channel
-var lastMsgPerChannel = make(map[string]*messages.Outgoing)
+var lastMsgPerChannel = make(map[string]*core.Outgoing)
 
 // Applies all filters to a message
-func handleFilterForMessage(msg *messages.Outgoing) *messages.Outgoing {
+func handleFilterForMessage(msg *core.Outgoing) *core.Outgoing {
 
 	if msg.NoFilter {
 		return registerSameMessagAvoidence(msg)
@@ -26,7 +25,7 @@ func handleFilterForMessage(msg *messages.Outgoing) *messages.Outgoing {
 	// Filter out commands
 	cond, err := regexp.MatchString("^[\\.\\/]", msg.Message)
 	if err != nil {
-		channels.Errors <- fmt.Errorf("regex for irc command check failed: %w", err)
+		core.Errors <- fmt.Errorf("regex for irc command check failed: %w", err)
 		// assume match
 		cond = true
 	}
@@ -38,7 +37,7 @@ func handleFilterForMessage(msg *messages.Outgoing) *messages.Outgoing {
 }
 
 // Checks if sending the same message twice in a row, and appends a character
-func registerSameMessagAvoidence(msg *messages.Outgoing) *messages.Outgoing {
+func registerSameMessagAvoidence(msg *core.Outgoing) *core.Outgoing {
 	// Same message avoidence
 	if lastMsgPerChannel[msg.Channel] != nil && msg.Message == lastMsgPerChannel[msg.Channel].Message {
 		msg.Message += " 󠀀" // invis character

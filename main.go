@@ -6,13 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/client"
 	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
+	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
-	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 	"github.com/NotNotQuinn/go-irc/data"
 	"github.com/NotNotQuinn/go-irc/handlers"
 )
@@ -59,7 +58,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	user, err := wbUser.GetUser("urmom", 0)
+	user, err := core.GetUser("urmom", 0)
 	fmt.Printf("wbUser.GetUser(\"quinndt\", 0): %v, %v\n", user, err)
 
 	fmt.Print(".")
@@ -76,7 +75,7 @@ func handleErrors() {
 		// although it doesnt seem like much, it allows for good error logging later on.
 		// Errors should only be passed to this stream if there is no other place, and
 		// a panic is not sutible
-		err := <-channels.Errors
+		err := <-core.Errors
 		fmt.Printf("Error: %+v\n", err)
 	}
 }

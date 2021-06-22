@@ -1,10 +1,9 @@
-package messages
+package core
 
 import (
 	"reflect"
 	"testing"
 
-	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
@@ -27,7 +26,7 @@ func TestNewIncoming(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "michaelreeves",
 			Message:  "Pog",
-			User:     wbUser.FakeUser("quinndt"),
+			User:     FakeUser("quinndt"),
 			Raw:      &msg_michaelreeves_quinndt,
 			DMs:      false,
 		}},
@@ -35,7 +34,7 @@ func TestNewIncoming(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "supinic",
 			Message:  "APU test 1 2 3 2 1 tset upA",
-			User:     wbUser.FakeUser("quinndt"),
+			User:     FakeUser("quinndt"),
 			Raw:      &msg_supinic_quinndt,
 			DMs:      false,
 		}},
@@ -43,7 +42,7 @@ func TestNewIncoming(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "Hi :)",
-			User:     wbUser.FakeUser("quinndt"),
+			User:     FakeUser("quinndt"),
 			Raw:      &whisper_quinndt,
 			DMs:      true,
 		}},
@@ -72,14 +71,14 @@ func TestNewOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "quinndt",
 			Message:  "yo",
-			User:     wbUser.FakeUser("quinndt"),
+			User:     FakeUser("quinndt"),
 			Raw:      nil,
 			DMs:      false,
 		}, "WADUP!!"}, &Outgoing{
 			Platform: Twitch,
 			Message:  "WADUP!!",
 			Channel:  "quinndt",
-			User:     wbUser.FakeUser("quinndt"),
+			User:     FakeUser("quinndt"),
 			DM:       false,
 			NoFilter: false,
 		}},
@@ -87,14 +86,14 @@ func TestNewOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "Hi!!",
-			User:     wbUser.FakeUser("turtoise"),
+			User:     FakeUser("turtoise"),
 			Raw:      nil,
 			DMs:      true,
 		}, "yo"}, &Outgoing{
 			Platform: Twitch,
 			Message:  "yo",
 			Channel:  "",
-			User:     wbUser.FakeUser("turtoise"),
+			User:     FakeUser("turtoise"),
 			DM:       true,
 			NoFilter: false,
 		}},
@@ -123,7 +122,7 @@ func TestFakeOutgoing(t *testing.T) {
 			Platform: Unknown,
 			Message:  "",
 			Channel:  "",
-			User:     wbUser.FakeUser(""),
+			User:     FakeUser(""),
 			DM:       false,
 			NoFilter: false,
 		}},
@@ -131,7 +130,7 @@ func TestFakeOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Message:  "yoo!",
 			Channel:  "quinndt",
-			User:     wbUser.FakeUser(""),
+			User:     FakeUser(""),
 			DM:       false,
 			NoFilter: false,
 		}},
@@ -149,7 +148,7 @@ func TestFakeIncoming(t *testing.T) {
 	type args struct {
 		channel  string
 		message  string
-		user     wbUser.User
+		user     User
 		DMs      bool
 		platform PlatformType
 	}
@@ -158,27 +157,27 @@ func TestFakeIncoming(t *testing.T) {
 		args args
 		want *Incoming
 	}{
-		{"least information possible", args{"", "", wbUser.FakeUser(""), false, Unknown}, &Incoming{
+		{"least information possible", args{"", "", FakeUser(""), false, Unknown}, &Incoming{
 			Platform: Unknown,
 			Channel:  "",
 			Message:  "",
-			User:     wbUser.FakeUser(""),
+			User:     FakeUser(""),
 			Raw:      nil,
 			DMs:      false,
 		}},
-		{"normal message", args{"quinndt", "squadR turdoise", wbUser.FakeUser("turtoise"), false, Twitch}, &Incoming{
+		{"normal message", args{"quinndt", "squadR turdoise", FakeUser("turtoise"), false, Twitch}, &Incoming{
 			Platform: Twitch,
 			Channel:  "quinndt",
 			Message:  "squadR turdoise",
-			User:     wbUser.FakeUser("turtoise"),
+			User:     FakeUser("turtoise"),
 			Raw:      nil,
 			DMs:      false,
 		}},
-		{"whispers", args{"", "pog it didnt crash", wbUser.FakeUser("quinndt"), true, Twitch}, &Incoming{
+		{"whispers", args{"", "pog it didnt crash", FakeUser("quinndt"), true, Twitch}, &Incoming{
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "pog it didnt crash",
-			User:     wbUser.FakeUser("quinndt"),
+			User:     FakeUser("quinndt"),
 			Raw:      nil,
 			DMs:      true,
 		}},

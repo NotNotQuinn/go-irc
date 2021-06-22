@@ -3,10 +3,9 @@ package command
 import (
 	"strings"
 
-	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
-	"github.com/NotNotQuinn/go-irc/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
@@ -16,7 +15,7 @@ import (
 //  * Execute commands
 //  * Respond to messages
 //  * Abort because of ratelimits
-func HandleMessage(inMsg *messages.Incoming) error {
+func HandleMessage(inMsg *core.Incoming) error {
 	ctx := GetContext(inMsg)
 	if ctx != nil && ctx.Command != nil {
 		// Handle command
@@ -34,7 +33,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 		}
 		ratelimiter.InvokeCooldown(ctx.Command, inMsg.Channel, inMsg.User)
 		res, err := ctx.Command.Execution(ctx)
-		channels.MessagesOUT <- res.ToOutgoing(ctx)
+		core.MessagesOUT <- res.ToOutgoing(ctx)
 		if err != nil {
 			return err
 		}
@@ -42,7 +41,7 @@ func HandleMessage(inMsg *messages.Incoming) error {
 	return nil
 }
 
-func GetContext(inMsg *messages.Incoming) *cmd.Context {
+func GetContext(inMsg *core.Incoming) *cmd.Context {
 	if inMsg == nil {
 		return nil
 	}

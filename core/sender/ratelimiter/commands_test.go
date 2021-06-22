@@ -6,7 +6,7 @@ import (
 
 	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
-	wbUser "github.com/NotNotQuinn/go-irc/core/user"
+	wbUser "github.com/NotNotQuinn/go-irc/core"
 )
 
 func TestMain(m *testing.M) {

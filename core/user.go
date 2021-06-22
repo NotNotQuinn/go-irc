@@ -1,4 +1,4 @@
-package wbUser
+package core
 
 import (
 	"errors"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/data"
-	twitch "github.com/gempir/go-twitch-irc"
+	"github.com/gempir/go-twitch-irc/v2"
 )
 
 var (
@@ -93,11 +93,11 @@ func GetUser(Name string, ID uint) (*User, error) {
 func AlwaysGetUser(tu twitch.User) *User {
 	u, err := getUser(tu)
 	if err != nil {
-		channels.Errors <- fmt.Errorf("error getting user for message: %w", err)
+		Errors <- fmt.Errorf("error getting user for message: %w", err)
 		TID, err := strconv.ParseUint(tu.ID, 10, 1)
 		if err != nil {
 			// Should never happen
-			channels.Errors <- err
+			Errors <- err
 			return nil
 		}
 		u = &User{
