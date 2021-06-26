@@ -3,10 +3,11 @@ package ratelimiter
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
-	wbUser "github.com/NotNotQuinn/go-irc/core"
+	"github.com/NotNotQuinn/go-irc/core"
 )
 
 func TestMain(m *testing.M) {
@@ -21,7 +22,7 @@ func TestCheckCommand(t *testing.T) {
 	type args struct {
 		command *cmd.Command
 		channel string
-		user    wbUser.User
+		user    *core.User
 	}
 	tests := []struct {
 		name string
@@ -60,17 +61,42 @@ func Test_initCommand(t *testing.T) {
 	type args struct {
 		command *cmd.Command
 		channel string
-		user    wbUser.User
+		user    *core.User
 	}
 	tests := []struct {
 		name string
 		args args
 	}{
-		{"New case", args{&cmd.Command{Name: "CMDname"}, "jtv", wbUser.FakeUser("yourmom")}},
-		{"Command name already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.FakeUser("yourm0m")}},
-		{"Command name and channel already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.FakeUser("yourmother")}},
-		{"Duplicate case", args{&cmd.Command{Name: "CMDname"}, "justinfan123", wbUser.FakeUser("yourmother")}},
-		{"New case", args{&cmd.Command{Name: "OtherCommand"}, "quinndt", wbUser.FakeUser("quinndt")}},
+		{"New case", args{&cmd.Command{Name: "CMDname"}, "jtv", &core.User{
+			ID:        100000,
+			Name:      "yourmom",
+			TwitchID:  6660,
+			FirstSeen: time.Date(1700, 1, 0, 1, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}}},
+		{"Command name already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", &core.User{
+			ID:        160000,
+			Name:      "yourm0m",
+			TwitchID:  666000,
+			FirstSeen: time.Date(1400, 1, 0, 1, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}}},
+		{"Command name and channel already initilized", args{&cmd.Command{Name: "CMDname"}, "justinfan123", &core.User{
+			ID:        4999,
+			Name:      "yourmother",
+			TwitchID:  9994,
+			FirstSeen: time.Date(1499, 1, 0, 0, 1, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}}},
+		{"Duplicate case", args{&cmd.Command{Name: "CMDname"}, "justinfan123", &core.User{
+			ID:        4999,
+			Name:      "yourmother",
+			TwitchID:  9994,
+			FirstSeen: time.Date(1499, 1, 0, 0, 1, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}}},
+		{"New case", args{&cmd.Command{Name: "OtherCommand"}, "quinndt", &core.User{
+			ID:        1,
+			Name:      "quinndt",
+			TwitchID:  123123,
+			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -107,7 +133,7 @@ func TestInvokeCooldown(t *testing.T) {
 	type args struct {
 		command *cmd.Command
 		channel string
-		user    wbUser.User
+		user    *core.User
 	}
 	tests := []struct {
 		name string
