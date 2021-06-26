@@ -12,7 +12,7 @@ type Outgoing struct {
 	// The channel to send the message to
 	Channel string
 	// The user the message is directed at
-	User User
+	User *User
 	// Whether the message should be sent privately
 	DM bool
 	// Note: If more of fields of the below nature are added it may be benifitial to change to ENUM slice based flags
@@ -29,7 +29,7 @@ type Incoming struct {
 	// The message text
 	Message string
 	// The user who sent the message
-	User User
+	User *User
 	// The raw message
 	Raw *twitch.Message
 	// Whether the message was sent privately

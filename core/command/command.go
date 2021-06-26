@@ -49,7 +49,7 @@ func GetContext(inMsg *core.Incoming) *cmd.Context {
 	isCMD, args := prepareMessage(inMsg.Message)
 	commandName := args[0]
 	args = args[1:]
-	context := &cmd.Context{Incoming: inMsg, Args: args, Invocation: commandName, User: &inMsg.User}
+	context := &cmd.Context{Incoming: inMsg, Args: args, Invocation: commandName, User: inMsg.User}
 	if isCMD {
 		context.Command = cmd.GetCmd(commandName)
 	}

@@ -14,7 +14,7 @@ import (
 
 var (
 	// Maps user (internal) ID to user pointer.
-	userIDMap = make(map[uint]*User)
+	userIDMap = make(map[uint64]*User)
 	// Maps user name to user pointer.
 	userNameMap = make(map[string]*User)
 )
@@ -25,10 +25,6 @@ type User struct {
 	Name      string
 	TwitchID  uint64
 	FirstSeen string
-}
-
-func FakeUser(s string) User {
-	return User{0, s, 0, ""}
 }
 
 // Represents ability to perform actions as a specific user
@@ -51,10 +47,13 @@ func (u User) GetPermissions() *UserPermissions {
 // Get a user.
 //
 // Allowed types: string, and int
-func GetUser(Name string, ID uint) (*User, error) {
+func GetUser(Name string, ID uint64) (*User, error) {
+	if data.CoreDB == nil {
+		return nil, errors.New("database not availible")
+	}
 	var u *User
 	var cond string
-	var args []interface{} = make([]interface{}, 2)
+	var args []interface{}
 	if Name != "" && ID != 0 {
 		u = userIDMap[ID]
 		u2 := userNameMap[Name]
@@ -94,7 +93,7 @@ func AlwaysGetUser(tu twitch.User) *User {
 	u, err := getUser(tu)
 	if err != nil {
 		Errors <- fmt.Errorf("error getting user for message: %w", err)
-		TID, err := strconv.ParseUint(tu.ID, 10, 1)
+		TID, err := strconv.ParseUint(tu.ID, 10, 64)
 		if err != nil {
 			// Should never happen
 			Errors <- err
@@ -110,25 +109,21 @@ func AlwaysGetUser(tu twitch.User) *User {
 	return u
 }
 
-// Gets a user
+// Gets a user, or creates it.
 func getUser(tu twitch.User) (*User, error) {
+	TID, err := strconv.ParseUint(tu.ID, 10, 64)
+	if err != nil {
+		return nil, err
+	}
 	u, err := GetUser(tu.Name, 0)
 	if err != nil {
-		return nil, err
-	}
-	TID, err := strconv.ParseUint(tu.ID, 10, 1)
-	if err != nil {
-		return nil, err
-	}
-	if u.TwitchID != TID {
-		return nil, errors.New("username does not match twitch id")
-	}
-
-	if u == nil {
 		u, err = CreateNewUser(tu.Name, TID)
 		if err != nil {
 			return nil, err
 		}
+	}
+	if u.TwitchID != TID {
+		return nil, errors.New("username does not match twitch id")
 	}
 
 	return u, nil
@@ -152,7 +147,7 @@ func CreateNewUser(Name string, Twitch_ID uint64) (*User, error) {
 		uint(id),
 		Name,
 		uint64(Twitch_ID),
-		now.String(),
+		now.Format("2006-01-02 03:04:05"),
 	}, nil
 }
 
@@ -160,6 +155,6 @@ func CreateNewUser(Name string, Twitch_ID uint64) (*User, error) {
 func DefaultPermissions() *UserPermissions {
 	return &UserPermissions{
 		Admin: false,
-		User:  FakeUser(""),
+		User:  User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
 	}
 }
