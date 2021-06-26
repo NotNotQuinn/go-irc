@@ -70,9 +70,12 @@ func InitForTests(path string) error {
 		return err
 	}
 	confFile = filepath.Join(confDir, "public_conf.json")
-	privConfPath = filepath.Join(confDir, "private_conf.json")
-	// skip private - for automatic testing
+	privConfPath = filepath.Join(confDir, "tests_private_conf.json")
 	Public, err = getPublic()
+	if err != nil {
+		return err
+	}
+	Private, err = getPrivate()
 	return err
 }
 
@@ -87,6 +90,7 @@ func Init() error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("Private: %v\n", Private)
 	return nil
 }
 
