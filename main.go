@@ -58,8 +58,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	user, err := core.GetUser("urmom", 0)
-	fmt.Printf("wbUser.GetUser(\"quinndt\", 0): %v, %v\n", user, err)
 
 	fmt.Print(".")
 	err = cc.Connect()
