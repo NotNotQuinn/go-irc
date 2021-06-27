@@ -9,7 +9,7 @@ var pingCommand *Command = &Command{
 		}
 		return &Return{
 			Success: true,
-			Reply:   "Pong! " + ctx.Incoming.User.Name() + " in " + channel,
+			Reply:   "Pong! " + ctx.Incoming.User.Name + " in " + channel,
 		}, nil
 	},
 	Description: "Responds with the user and channel.",

@@ -7,10 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/cmd"
 	"github.com/NotNotQuinn/go-irc/config"
-	"github.com/NotNotQuinn/go-irc/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
@@ -54,7 +53,7 @@ func TestHandleMessage(t *testing.T) {
 	erroringCommand.Load()
 	workingCommand.Load()
 	type args struct {
-		inMsg *messages.Incoming
+		inMsg *core.Incoming
 	}
 	tests := []struct {
 		name         string
@@ -63,25 +62,50 @@ func TestHandleMessage(t *testing.T) {
 		wantResponse bool
 	}{
 		{"nil inMsg", args{nil}, false, false},
-		{"normal message", args{messages.FakeIncoming("jtv", "Hi!", "quinndt", false, messages.Twitch)}, false, false},
-		{"working command", args{messages.FakeIncoming("jtv", "|working lol", "quinndt", false, messages.Twitch)}, false, true},
-		{"working command with alias", args{messages.FakeIncoming("jtv", "|Work lol", "quinndt", false, messages.Twitch)}, false, true},
-		{"erroring command with response", args{messages.FakeIncoming("jtv", "|Error lol xd", "quinndt", false, messages.Twitch)}, true, true},
-		{"erroring command without response", args{messages.FakeIncoming("jtv", "|Error xd", "quinndt", false, messages.Twitch)}, true, false},
+		{"normal message", args{core.FakeIncoming("jtv", "Hi!", &core.User{
+			ID:        1,
+			Name:      "quinndt",
+			TwitchID:  123123,
+			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}, false, core.Twitch)}, false, false},
+		{"working command", args{core.FakeIncoming("jtv", "|working lol", &core.User{
+			ID:        1,
+			Name:      "quinndt",
+			TwitchID:  123123,
+			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}, false, core.Twitch)}, false, true},
+		{"working command with alias", args{core.FakeIncoming("jtv", "|Work lol", &core.User{
+			ID:        1,
+			Name:      "quinndt",
+			TwitchID:  123123,
+			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}, false, core.Twitch)}, false, true},
+		{"erroring command with response", args{core.FakeIncoming("jtv", "|Error lol xd", &core.User{
+			ID:        1,
+			Name:      "quinndt",
+			TwitchID:  123123,
+			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}, false, core.Twitch)}, true, true},
+		{"erroring command without response", args{core.FakeIncoming("jtv", "|Error xd", &core.User{
+			ID:        1,
+			Name:      "quinndt",
+			TwitchID:  123123,
+			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}, false, core.Twitch)}, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := HandleMessage(tt.args.inMsg); (err != nil) != tt.wantErr {
 				t.Errorf("HandleMessage() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			var res *messages.Outgoing
+			var res *core.Outgoing
 			time.Sleep(time.Second / 100)
 			select {
-			case res = <-channels.MessagesOUT:
+			case res = <-core.MessagesOUT:
 			default:
 			}
 			if (res != nil) != tt.wantResponse {
-				t.Errorf("HandleMessage(); <-channels.MessagesOUT = %v, wantResponse %v", res, tt.wantResponse)
+				t.Errorf("HandleMessage(); <-core.MessagesOUT %v, wantResponse %v", res, tt.wantResponse)
 			}
 		})
 	}
@@ -104,7 +128,7 @@ func TestGetContext(t *testing.T) {
 	testCommand.Load()
 
 	type args struct {
-		inMsg *messages.Incoming
+		inMsg *core.Incoming
 	}
 	tests := []struct {
 		name string
@@ -113,69 +137,166 @@ func TestGetContext(t *testing.T) {
 	}{
 		{"nil msg", args{nil}, nil},
 		{
-			"empty everything", args{messages.FakeIncoming("", "", "", false, messages.Twitch)},
+			"empty everything", args{core.FakeIncoming("", "", &core.User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("", "", "", false, messages.Twitch),
+				Incoming:   core.FakeIncoming("", "", &core.User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""}, false, core.Twitch),
 				Args:       []string{},
 				Invocation: "",
+				User:       &core.User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
 			},
 		},
 		{
-			"no prefix", args{messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch)},
+			"no prefix", args{core.FakeIncoming("jtv", "Hi im a big fan!", &core.User{
+				ID:        10,
+				Name:      "justinfan123",
+				TwitchID:  10101010101123,
+				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "Hi im a big fan!", "justinfan123", false, messages.Twitch),
+				Incoming: core.FakeIncoming("jtv", "Hi im a big fan!", &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				}, false, core.Twitch),
 				Args:       []string{"im", "a", "big", "fan!"},
 				Invocation: "Hi",
+				User: &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				},
 			},
 		},
 		{
 			"prefix with no command",
-			args{messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch)},
+			args{core.FakeIncoming("jtv", "|", &core.User{
+				ID:        10,
+				Name:      "justinfan123",
+				TwitchID:  10101010101123,
+				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "|", "justinfan123", false, messages.Twitch),
+				Incoming: core.FakeIncoming("jtv", "|", &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				}, false, core.Twitch),
 				Args:       []string{},
 				Invocation: "",
 				Command:    nil,
+				User: &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				},
 			},
 		},
 		{
 			"prefix with command",
-			args{messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch)},
+			args{core.FakeIncoming("jtv", "|testCMD", &core.User{
+				ID:        10,
+				Name:      "justinfan123",
+				TwitchID:  10101010101123,
+				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "|testCMD", "justinfan123", false, messages.Twitch),
+				Incoming: core.FakeIncoming("jtv", "|testCMD", &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				}, false, core.Twitch),
 				Args:       []string{},
 				Invocation: "testCMD",
 				Command:    testCommand,
+				User: &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				},
 			},
 		},
 		{
 			"prefix with command and arguments",
-			args{messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch)},
+			args{core.FakeIncoming("jtv", "|testCMD lol xd", &core.User{
+				ID:        10,
+				Name:      "justinfan123",
+				TwitchID:  10101010101123,
+				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("jtv", "|testCMD lol xd", "justinfan123", false, messages.Twitch),
+				Incoming: core.FakeIncoming("jtv", "|testCMD lol xd", &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				}, false, core.Twitch),
 				Args:       []string{"lol", "xd"},
 				Invocation: "testCMD",
 				Command:    testCommand,
+				User: &core.User{
+					ID:        10,
+					Name:      "justinfan123",
+					TwitchID:  10101010101123,
+					FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				},
 			},
 		},
 		{
 			"prefix with command using alias and arguments",
-			args{messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch)},
+			args{core.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", &core.User{
+				ID:        1000,
+				Name:      "AlienFAn",
+				TwitchID:  777777,
+				FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
+				Incoming: core.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", &core.User{
+					ID:        1000,
+					Name:      "AlienFAn",
+					TwitchID:  777777,
+					FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				}, false, core.Twitch),
 				Args:       []string{"AlienPls", "Les", "GOOOO"},
 				Invocation: "AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please",
 				Command:    testCommand,
+				User: &core.User{
+					ID:        1000,
+					Name:      "AlienFAn",
+					TwitchID:  777777,
+					FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				},
 			},
 		},
 		{
 			"prefix with command using alias with wrong capitals",
-			args{messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch)},
+			args{core.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", &core.User{
+				ID:        1000,
+				Name:      "AlienFAn",
+				TwitchID:  777777,
+				FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming:   messages.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", "AlienFAn", false, messages.Twitch),
+				Incoming: core.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", &core.User{
+					ID:        1000,
+					Name:      "AlienFAn",
+					TwitchID:  777777,
+					FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				}, false, core.Twitch),
 				Args:       []string{"AlienPls", "Les", "GOOOO"},
 				Invocation: "AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please",
 				Command:    nil,
+				User: &core.User{
+					ID:        1000,
+					Name:      "AlienFAn",
+					TwitchID:  777777,
+					FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				},
 			},
 		},
 	}

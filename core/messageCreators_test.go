@@ -1,10 +1,10 @@
-package messages
+package core
 
 import (
 	"reflect"
 	"testing"
+	"time"
 
-	wbUser "github.com/NotNotQuinn/go-irc/core/user"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
@@ -27,25 +27,40 @@ func TestNewIncoming(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "michaelreeves",
 			Message:  "Pog",
-			User:     wbUser.User("quinndt"),
-			Raw:      &msg_michaelreeves_quinndt,
-			DMs:      false,
+			User: &User{
+				1,
+				"quinndt",
+				123123,
+				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			},
+			Raw: &msg_michaelreeves_quinndt,
+			DMs: false,
 		}},
 		{"non-sub pleb message", args{msg_supinic_quinndt}, &Incoming{
 			Platform: Twitch,
 			Channel:  "supinic",
 			Message:  "APU test 1 2 3 2 1 tset upA",
-			User:     wbUser.User("quinndt"),
-			Raw:      &msg_supinic_quinndt,
-			DMs:      false,
+			User: &User{
+				1,
+				"quinndt",
+				123123,
+				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			},
+			Raw: &msg_supinic_quinndt,
+			DMs: false,
 		}},
 		{"whisper from quinndt", args{whisper_quinndt}, &Incoming{
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "Hi :)",
-			User:     wbUser.User("quinndt"),
-			Raw:      &whisper_quinndt,
-			DMs:      true,
+			User: &User{
+				1,
+				"quinndt",
+				123123,
+				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			},
+			Raw: &whisper_quinndt,
+			DMs: true,
 		}},
 	}
 	for _, tt := range tests {
@@ -72,14 +87,24 @@ func TestNewOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "quinndt",
 			Message:  "yo",
-			User:     wbUser.User("quinndt"),
-			Raw:      nil,
-			DMs:      false,
+			User: &User{
+				1,
+				"quinndt",
+				123123,
+				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			},
+			Raw: nil,
+			DMs: false,
 		}, "WADUP!!"}, &Outgoing{
 			Platform: Twitch,
 			Message:  "WADUP!!",
 			Channel:  "quinndt",
-			User:     wbUser.User("quinndt"),
+			User: &User{
+				1,
+				"quinndt",
+				123123,
+				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			},
 			DM:       false,
 			NoFilter: false,
 		}},
@@ -87,14 +112,14 @@ func TestNewOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "Hi!!",
-			User:     wbUser.User("turtoise"),
+			User:     &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")},
 			Raw:      nil,
 			DMs:      true,
 		}, "yo"}, &Outgoing{
 			Platform: Twitch,
 			Message:  "yo",
 			Channel:  "",
-			User:     wbUser.User("turtoise"),
+			User:     &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")},
 			DM:       true,
 			NoFilter: false,
 		}},
@@ -123,7 +148,7 @@ func TestFakeOutgoing(t *testing.T) {
 			Platform: Unknown,
 			Message:  "",
 			Channel:  "",
-			User:     wbUser.User(""),
+			User:     &User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
 			DM:       false,
 			NoFilter: false,
 		}},
@@ -131,7 +156,7 @@ func TestFakeOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Message:  "yoo!",
 			Channel:  "quinndt",
-			User:     wbUser.User(""),
+			User:     &User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
 			DM:       false,
 			NoFilter: false,
 		}},
@@ -149,7 +174,7 @@ func TestFakeIncoming(t *testing.T) {
 	type args struct {
 		channel  string
 		message  string
-		user     wbUser.User
+		user     *User
 		DMs      bool
 		platform PlatformType
 	}
@@ -158,29 +183,39 @@ func TestFakeIncoming(t *testing.T) {
 		args args
 		want *Incoming
 	}{
-		{"least information possible", args{"", "", wbUser.User(""), false, Unknown}, &Incoming{
+		{"least information possible", args{"", "", &User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""}, false, Unknown}, &Incoming{
 			Platform: Unknown,
 			Channel:  "",
 			Message:  "",
-			User:     wbUser.User(""),
+			User:     &User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
 			Raw:      nil,
 			DMs:      false,
 		}},
-		{"normal message", args{"quinndt", "squadR turdoise", wbUser.User("turtoise"), false, Twitch}, &Incoming{
+		{"normal message", args{"quinndt", "squadR turdoise", &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")}, false, Twitch}, &Incoming{
 			Platform: Twitch,
 			Channel:  "quinndt",
 			Message:  "squadR turdoise",
-			User:     wbUser.User("turtoise"),
+			User:     &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")},
 			Raw:      nil,
 			DMs:      false,
 		}},
-		{"whispers", args{"", "pog it didnt crash", wbUser.User("quinndt"), true, Twitch}, &Incoming{
+		{"whispers", args{"", "pog it didnt crash", &User{
+			1,
+			"quinndt",
+			123123,
+			time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+		}, true, Twitch}, &Incoming{
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "pog it didnt crash",
-			User:     wbUser.User("quinndt"),
-			Raw:      nil,
-			DMs:      true,
+			User: &User{
+				1,
+				"quinndt",
+				123123,
+				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			},
+			Raw: nil,
+			DMs: true,
 		}},
 	}
 	for _, tt := range tests {

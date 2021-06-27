@@ -166,6 +166,21 @@ type PrivateConfig struct {
 	Username string `json:"username"`
 	// Oauth token of account
 	Oauth string `json:"oauth"`
+	// Database config
+	Database PrivateDatabaseConfig `json:"database"`
+}
+
+// All private database config data
+type PrivateDatabaseConfig struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+}
+
+// Creates a mariadb driver specific string to connect to the database on a specific database.
+func (D *PrivateDatabaseConfig) ConnecterString(database string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", D.Username, D.Password, D.Host, D.Port, database)
 }
 
 // Load and return private config
