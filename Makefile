@@ -1,4 +1,10 @@
-OUTFILE=bin/Wanductbot.exe
+ifeq ($(OS),Windows_NT)
+	EXE=.exe
+else
+	EXE=
+endif
+
+OUTFILE=bin/wanductbot$(EXE)
 
 build:
 	go build -o $(OUTFILE) .
