@@ -164,6 +164,8 @@ type PrivateConfig struct {
 	Oauth string `json:"oauth"`
 	// Database config
 	Database PrivateDatabaseConfig `json:"database"`
+	// Is run production?
+	Prod bool `json:"production"`
 }
 
 // All private database config data
