@@ -95,7 +95,7 @@ func Test_initCommand(t *testing.T) {
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
-			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			FirstSeen: "2020-06-24 06:01:01",
 		}}},
 	}
 	for _, tt := range tests {

@@ -3,7 +3,6 @@ package core
 import (
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )
@@ -30,8 +29,8 @@ func TestNewIncoming(t *testing.T) {
 			User: &User{
 				1,
 				"quinndt",
-				123123,
-				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				440674731,
+				"2020-06-24 06:01:01",
 			},
 			Raw: &msg_michaelreeves_quinndt,
 			DMs: false,
@@ -43,8 +42,8 @@ func TestNewIncoming(t *testing.T) {
 			User: &User{
 				1,
 				"quinndt",
-				123123,
-				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				440674731,
+				"2020-06-24 06:01:01",
 			},
 			Raw: &msg_supinic_quinndt,
 			DMs: false,
@@ -56,8 +55,8 @@ func TestNewIncoming(t *testing.T) {
 			User: &User{
 				1,
 				"quinndt",
-				123123,
-				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				440674731,
+				"2020-06-24 06:01:01",
 			},
 			Raw: &whisper_quinndt,
 			DMs: true,
@@ -67,6 +66,7 @@ func TestNewIncoming(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := NewIncoming(tt.args.msg); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewIncoming() = %v, want %v", got, tt.want)
+				t.Errorf("NewIncoming().User = %v, want %v", got.User, tt.want.User)
 			}
 		})
 	}
@@ -90,8 +90,8 @@ func TestNewOutgoing(t *testing.T) {
 			User: &User{
 				1,
 				"quinndt",
-				123123,
-				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				440674731,
+				"2020-06-24 06:01:01",
 			},
 			Raw: nil,
 			DMs: false,
@@ -102,8 +102,8 @@ func TestNewOutgoing(t *testing.T) {
 			User: &User{
 				1,
 				"quinndt",
-				123123,
-				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				440674731,
+				"2020-06-24 06:01:01",
 			},
 			DM:       false,
 			NoFilter: false,
@@ -112,14 +112,14 @@ func TestNewOutgoing(t *testing.T) {
 			Platform: Twitch,
 			Channel:  "",
 			Message:  "Hi!!",
-			User:     &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")},
+			User:     &User{2, "turtoise", 485693696, "2020-06-24 06:01:01"},
 			Raw:      nil,
 			DMs:      true,
 		}, "yo"}, &Outgoing{
 			Platform: Twitch,
 			Message:  "yo",
 			Channel:  "",
-			User:     &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")},
+			User:     &User{2, "turtoise", 485693696, "2020-06-24 06:01:01"},
 			DM:       true,
 			NoFilter: false,
 		}},
@@ -191,11 +191,11 @@ func TestFakeIncoming(t *testing.T) {
 			Raw:      nil,
 			DMs:      false,
 		}},
-		{"normal message", args{"quinndt", "squadR turdoise", &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")}, false, Twitch}, &Incoming{
+		{"normal message", args{"quinndt", "squadR turdoise", &User{2, "turtoise", 485693696, "2020-06-24 06:01:01"}, false, Twitch}, &Incoming{
 			Platform: Twitch,
 			Channel:  "quinndt",
 			Message:  "squadR turdoise",
-			User:     &User{15, "turtoise", 485693696, time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05")},
+			User:     &User{2, "turtoise", 485693696, "2020-06-24 06:01:01"},
 			Raw:      nil,
 			DMs:      false,
 		}},
@@ -203,7 +203,7 @@ func TestFakeIncoming(t *testing.T) {
 			1,
 			"quinndt",
 			123123,
-			time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			"2020-06-24 06:01:01",
 		}, true, Twitch}, &Incoming{
 			Platform: Twitch,
 			Channel:  "",
@@ -212,7 +212,7 @@ func TestFakeIncoming(t *testing.T) {
 				1,
 				"quinndt",
 				123123,
-				time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+				"2020-06-24 06:01:01",
 			},
 			Raw: nil,
 			DMs: true,

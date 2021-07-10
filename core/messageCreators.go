@@ -15,7 +15,7 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 			Platform: Twitch,
 			Channel:  "",
 			Message:  v.Message,
-			User:     AlwaysGetUser(v.User),
+			User:     AlwaysGetUser(v.User.Name, v.User.ID),
 			Raw:      (*twitch.Message)(&msg),
 			DMs:      true,
 		}
@@ -24,7 +24,7 @@ func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
 			Platform: Twitch,
 			Channel:  v.Channel,
 			Message:  v.Message,
-			User:     AlwaysGetUser(v.User),
+			User:     AlwaysGetUser(v.User.Name, v.User.ID),
 			Raw:      (*twitch.Message)(&msg),
 		}
 	default:

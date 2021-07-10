@@ -66,31 +66,31 @@ func TestHandleMessage(t *testing.T) {
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
-			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, false, false},
 		{"working command", args{core.FakeIncoming("jtv", "|working lol", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
-			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, false, true},
 		{"working command with alias", args{core.FakeIncoming("jtv", "|Work lol", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
-			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, false, true},
 		{"erroring command with response", args{core.FakeIncoming("jtv", "|Error lol xd", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
-			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, true, true},
 		{"erroring command without response", args{core.FakeIncoming("jtv", "|Error xd", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
-			FirstSeen: time.Date(2020, 6, 24, 6, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
+			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, true, false},
 	}
 	for _, tt := range tests {
