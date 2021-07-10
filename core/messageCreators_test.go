@@ -3,6 +3,7 @@ package core
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/gempir/go-twitch-irc/v2"
 )
