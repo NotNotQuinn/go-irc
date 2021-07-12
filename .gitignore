@@ -1,2 +1,8 @@
+# Private data
 private*
+
+# Binaries LuL
 bin/
+
+# Production flag file
+config/PRODUCTION
