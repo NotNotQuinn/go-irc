@@ -51,9 +51,14 @@ func (l stringList) Inclues(query string) bool {
 
 // All public config data
 type PublicConfig struct {
-	Twitch PublicTwitchConfig `json:"twitch"`
-	Global PublicGlobalConfig `json:"global"`
-	Users  PublicUsersConfig  `json:"users"`
+	Twitch      PublicTwitchConfig `json:"twitch"`
+	Global      PublicGlobalConfig `json:"global"`
+	Users       PublicUsersConfig  `json:"users"`
+	Development struct {
+		Channels []string `json:"channels"`
+		Prefix   string   `json:"prefix"`
+	} `json:"development"`
+	Production bool
 }
 
 // Should be used to init for a test
@@ -102,10 +107,15 @@ func getPublic() (*PublicConfig, error) {
 	}
 	var config PublicConfig
 	err = json.Unmarshal(bytes, &config)
-	if err != nil {
-		return nil, err
+	if _, err := os.Stat(filepath.Join(confDir, "PRODUCTION")); err == nil {
+		// Only set on load, not reload.
+		config.Production = true
+	} else if os.IsNotExist(err) {
+		// Development
+		config.Twitch.Channels = config.Development.Channels
+		config.Global.CommandPrefix = config.Development.Prefix
 	}
-	return &config, nil
+	return &config, err
 }
 
 // Reload the config from file
@@ -118,11 +128,17 @@ func (conf *PublicConfig) Reload() error {
 	if err != nil {
 		return err
 	}
-	var config PublicConfig
-	err = json.Unmarshal(bytes, &config)
+	var config *PublicConfig
+	err = json.Unmarshal(bytes, config)
 	if err != nil {
 		return err
 	}
+	if !conf.Production {
+		// Development
+		config.Twitch.Channels = config.Development.Channels
+		config.Global.CommandPrefix = config.Development.Prefix
+	}
+	*conf = *config
 	return nil
 }
 
@@ -162,6 +178,21 @@ type PrivateConfig struct {
 	Username string `json:"username"`
 	// Oauth token of account
 	Oauth string `json:"oauth"`
+	// Database config
+	Database PrivateDatabaseConfig `json:"database"`
+}
+
+// All private database config data
+type PrivateDatabaseConfig struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+}
+
+// Creates a mariadb driver specific string to connect to the database on a specific database.
+func (D *PrivateDatabaseConfig) ConnecterString(database string) string {
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", D.Username, D.Password, D.Host, D.Port, database)
 }
 
 // Load and return private config

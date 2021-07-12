@@ -19,5 +19,11 @@
 	},
 	"users": {
 		"admins": ["quinndt"]
+	},
+	"development": {
+		"channels": [
+			"turtoise"
+		],
+		"prefix": "||"
 	}
 }
