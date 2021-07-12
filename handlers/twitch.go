@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 
+	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/gempir/go-twitch-irc/v2"
 )
@@ -27,5 +28,7 @@ func privmsg(msg twitch.PrivateMessage) {
 // Called on connect
 func connected() {
 	fmt.Println("Connected!")
-	core.MessagesOUT <- core.FakeOutgoing("turtoise", "Hi :)", core.Twitch)
+	if config.Public.Production {
+		core.MessagesOUT <- core.FakeOutgoing("turtoise", "Hi :)", core.Twitch)
+	}
 }
