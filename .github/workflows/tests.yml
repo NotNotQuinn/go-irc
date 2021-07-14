@@ -6,7 +6,13 @@ on:
     branches:
   workflow_dispatch:
 
-# jobs:
+jobs:
+  dummy:
+    name: dummy
+    runs-on: ubuntu-latest
+    steps:
+      - name: dummy
+        run: echo "lol"
 #   test:
 #     name: tests
 #     runs-on: ubuntu-latest
