@@ -1,8 +1,8 @@
 {
     "database": {
-        "username": "wanductbot",
+        "username": "root",
         "password": "IF CHAT SEES THIS VI VON ZULUL",
-        "host": "localhost",
-        "port": 3307
+        "host": "mariadb",
+        "port": 3306
     }
 }

@@ -1,0 +1,16 @@
+version: "3.9"
+
+services:
+    bot:
+        build:
+            context: .
+            args:
+                test: "true"
+        depends_on:
+            - mariadb
+
+    mariadb:
+        image: mariadb:10.3
+        environment:
+            MYSQL_ROOT_PASSWORD: IF CHAT SEES THIS VI VON ZULUL
+            MYSQL_DATABASE: wb_core
