@@ -1,4 +1,4 @@
-CREATE TABLE `wb_core`.`user` (
+CREATE TABLE IF NOT EXISTS `wb_core`.`user` (
 	`ID` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`Name` VARCHAR(50) NOT NULL COLLATE 'utf8_general_ci',
 	`Twitch_ID` INT(16) UNSIGNED NOT NULL,
