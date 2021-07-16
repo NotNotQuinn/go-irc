@@ -4,7 +4,7 @@ services:
     tests:
         build:
             context: .
-            dockerfile: Dockerfile
+            dockerfile: tests.Dockerfile
             args:
                 test: "true"
         restart: "no"
@@ -20,13 +20,6 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: IF CHAT SEES THIS VI VON ZULUL
             MYSQL_DATABASE: wb_core
-    populator:
-        build:
-            context: .
-            dockerfile: populate-database.Dockerfile
-        restart: "no"
-        depends_on:
-            - mariadb
 
 volumes:
     mariadb_test_data:
