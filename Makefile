@@ -1,17 +1,24 @@
+# Check OS
 ifeq ($(OS),Windows_NT)
 	EXE=.exe
 else
 	EXE=
 endif
 
-OUTFILE=bin/wanductbot$(EXE)
+BOT_OUTFILE=bin/wanductbot$(EXE)
+POPULATOR_OUTFILE=bin/populator$(EXE)
 
-build:
-	go build -o $(OUTFILE) .
+bot:
+	go build -o $(BOT_OUTFILE) .
+
+populator:
+	go build -o $(POPULATOR_OUTFILE) ./data/populator
+
 clean:
 	rm -rf bin/
-run: build
-	$(OUTFILE)
+
+run: bot
+	$(BOT_OUTFILE)
 
 lint:
 #   To install this lint tool
@@ -27,3 +34,4 @@ test:
 	go test ./...
 
 lint-test: lint test
+all: build populator
