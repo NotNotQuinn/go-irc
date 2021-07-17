@@ -1,16 +1,12 @@
 package cmd
 
+import "fmt"
+
 var pingCommand *Command = &Command{
 	Name: "ping",
 	Execution: func(ctx *Context) (*Return, error) {
-		channel := "whispers"
-		if ctx.Incoming.Channel != "" {
-			channel = "#" + ctx.Incoming.Channel
-		}
 		return &Return{
 			Success: true,
-			Reply:   "Pong! " + ctx.Incoming.User.Name + " in " + channel,
+			Reply:   fmt.Sprintf("PONG! You are %s, Local ID: %d; Twitch ID: %d; First Seen: %s", ctx.User.Name, ctx.User.ID, ctx.User.TwitchID, ctx.User.FirstSeen),
 		}, nil
-	},
-	Description: "Responds with the user and channel.",
-}
+	}}
