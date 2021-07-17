@@ -9,11 +9,13 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'echo "\"${last_command}\" command filed with exit code $?."' EXIT
 
 
-# I dont know if mariadb will always be working before this starts.
-sleep 7
-# I dont know if WORKDIR is preserved when executing the entrypoint.
-cd /bot
+# Wait untill mariadb is running
+while ! nc -z mariadb 3306; do
+    sleep 0.1
+done
+
 # Populate the database with test data.
+cd /bot
 /bot/bin/populator
 # Run all tests.
 go test ./...
