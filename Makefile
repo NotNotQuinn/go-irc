@@ -21,17 +21,23 @@ run: bot
 	$(BOT_OUTFILE)
 
 lint:
-#   To install this lint tool
-#   See this for your operating system
-#   https://golangci-lint.run/usage/install/
+# To install this lint tool
+# See this for your operating system
+# https://golangci-lint.run/usage/install/
 	golangci-lint run ./...
 
 push: lint-test
-#   Hahahah, git in my makefile!
+# Hahahah, git in my makefile!
 	git push
 
 test:
-	go test ./...
+# Only build for now, may publish on docker hub and use an image.
+	docker compose build
+	docker compose up --abort-on-container-exit
+
+reset-test:
+	docker compose down
+	docker volume rm twitch-bot_mariadb_test_data
 
 lint-test: lint test
 all: build populator
