@@ -20,43 +20,43 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	count, err := runSqlFiles("./data/sql")
+	stats, err := runSqlFiles("./data/sql")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Ran %d files.", count)
+	fmt.Printf("Ran %d files. (%d queries, %d rows affected)\n", stats.NumFiles, stats.NumQueries, stats.NumRows)
 }
 
-// Runs SQL files in a directory (or just one file) in alphabetical order.
+// Runs SQL files in a directory in alphabetical order.
 // Works best when files are labeled on their order, e.g. `00-database1.sql`, `01-table1.sql`
 //
 // Will only run files ending with `.sql`
 //
-// `path`: path to file to read and execute as SQL. Will run recursively on directories.
-func runSqlFiles(dir string) (fileCount int, err error) {
+// `dir`: Path to directory containing SQL files. Ignores directories and other files.
+func runSqlFiles(dir string) (stats struct{ NumFiles, NumQueries, NumRows int }, err error) {
 	stat, err := os.Stat(dir)
 	if err != nil {
-		return fileCount, err
+		return stats, err
 	}
 	if !stat.IsDir() {
-		return fileCount, errors.New("not a directory")
+		return stats, errors.New("not a directory")
 	}
 
-	// List of SQL queries to execute.
-	// var ExecQueue = []string{}
 	if items, err := os.ReadDir(dir); err == nil {
 		for _, item := range items {
 			if item.IsDir() {
+				// Ignore
 				continue
 			}
 			bytes, err := os.ReadFile(filepath.Join(dir, item.Name()))
 			if err != nil {
-				return fileCount, err
+				return stats, err
 			}
 			rawQueries := strings.Split(string(bytes), ";")
 			var queries []string
+			// Must be a seperate loop to count the ammount of actual queries are in a file beforehand
 			for i, query := range rawQueries {
-				// Append missing semicolon, Trim query and ignore if its empty
+				// Append missing semicolon, ignore if trimming it results in empty string
 				if i+1 != len(query) {
 					query += ";"
 				}
@@ -68,21 +68,23 @@ func runSqlFiles(dir string) (fileCount int, err error) {
 			}
 
 			for i, query := range queries {
-				// Still use the original string
+				// Execute, print stats, and update stats
 				res, err := data.CoreDB.Exec(query)
 				if err != nil {
-					return fileCount, err
+					return stats, err
 				}
 				rows, err := res.RowsAffected()
 				if err != nil {
-					return fileCount, err
+					return stats, err
 				}
 				fmt.Printf("%s (%d/%d): %d rows affected\n", item.Name(), i+1, len(queries), rows)
+				stats.NumRows += int(rows)
+				stats.NumQueries++
 			}
-			fileCount++
+			stats.NumFiles++
 		}
 	} else {
-		return fileCount, err
+		return stats, err
 	}
-	return fileCount, nil
+	return stats, nil
 }
