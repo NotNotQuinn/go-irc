@@ -52,7 +52,9 @@ func runSqlFiles(dir string) (fileCount int, err error) {
 			if err != nil {
 				return fileCount, err
 			}
-			res, err := data.CoreDB.Exec(string(bytes))
+			query := string(bytes)
+			fmt.Printf("Exec: \n%s\n", query)
+			res, err := data.CoreDB.Exec(query)
 			if err != nil {
 				return fileCount, err
 			}
