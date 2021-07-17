@@ -13,11 +13,15 @@ import (
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
+var prefix string
+
 func TestMain(m *testing.M) {
 	err := config.InitForTests("../../config")
 	if err != nil {
 		panic(err)
 	}
+	prefix = config.Public.Global.CommandPrefix
+
 	// ignore rate limits
 	ignoreLimits := make(chan bool)
 	go ratelimiter.IgnoreAllCommandLimits(ignoreLimits)
@@ -68,25 +72,25 @@ func TestHandleMessage(t *testing.T) {
 			TwitchID:  123123,
 			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, false, false},
-		{"working command", args{core.FakeIncoming("jtv", "|working lol", &core.User{
+		{"working command", args{core.FakeIncoming("jtv", prefix+"working lol", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
 			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, false, true},
-		{"working command with alias", args{core.FakeIncoming("jtv", "|Work lol", &core.User{
+		{"working command with alias", args{core.FakeIncoming("jtv", prefix+"Work lol", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
 			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, false, true},
-		{"erroring command with response", args{core.FakeIncoming("jtv", "|Error lol xd", &core.User{
+		{"erroring command with response", args{core.FakeIncoming("jtv", prefix+"Error lol xd", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
 			FirstSeen: "2020-06-24 06:01:01",
 		}, false, core.Twitch)}, true, true},
-		{"erroring command without response", args{core.FakeIncoming("jtv", "|Error xd", &core.User{
+		{"erroring command without response", args{core.FakeIncoming("jtv", prefix+"Error xd", &core.User{
 			ID:        1,
 			Name:      "quinndt",
 			TwitchID:  123123,
@@ -171,14 +175,14 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with no command",
-			args{core.FakeIncoming("jtv", "|", &core.User{
+			args{core.FakeIncoming("jtv", prefix, &core.User{
 				ID:        10,
 				Name:      "justinfan123",
 				TwitchID:  10101010101123,
 				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
 			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming: core.FakeIncoming("jtv", "|", &core.User{
+				Incoming: core.FakeIncoming("jtv", prefix, &core.User{
 					ID:        10,
 					Name:      "justinfan123",
 					TwitchID:  10101010101123,
@@ -197,14 +201,14 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command",
-			args{core.FakeIncoming("jtv", "|testCMD", &core.User{
+			args{core.FakeIncoming("jtv", prefix+"testCMD", &core.User{
 				ID:        10,
 				Name:      "justinfan123",
 				TwitchID:  10101010101123,
 				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
 			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming: core.FakeIncoming("jtv", "|testCMD", &core.User{
+				Incoming: core.FakeIncoming("jtv", prefix+"testCMD", &core.User{
 					ID:        10,
 					Name:      "justinfan123",
 					TwitchID:  10101010101123,
@@ -223,14 +227,14 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command and arguments",
-			args{core.FakeIncoming("jtv", "|testCMD lol xd", &core.User{
+			args{core.FakeIncoming("jtv", prefix+"testCMD lol xd", &core.User{
 				ID:        10,
 				Name:      "justinfan123",
 				TwitchID:  10101010101123,
 				FirstSeen: time.Date(2007, 0, 0, 0, 0, 0, 0, time.UTC).Format("2006-01-02 03:04:05"),
 			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming: core.FakeIncoming("jtv", "|testCMD lol xd", &core.User{
+				Incoming: core.FakeIncoming("jtv", prefix+"testCMD lol xd", &core.User{
 					ID:        10,
 					Name:      "justinfan123",
 					TwitchID:  10101010101123,
@@ -249,14 +253,14 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command using alias and arguments",
-			args{core.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", &core.User{
+			args{core.FakeIncoming("tetyys", prefix+"AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", &core.User{
 				ID:        1000,
 				Name:      "AlienFAn",
 				TwitchID:  777777,
 				FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
 			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming: core.FakeIncoming("tetyys", "|AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", &core.User{
+				Incoming: core.FakeIncoming("tetyys", prefix+"AYYYYyyyyyyyLMAAAAAOOOOOO_Alien_Please AlienPls Les GOOOO", &core.User{
 					ID:        1000,
 					Name:      "AlienFAn",
 					TwitchID:  777777,
@@ -275,14 +279,14 @@ func TestGetContext(t *testing.T) {
 		},
 		{
 			"prefix with command using alias with wrong capitals",
-			args{core.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", &core.User{
+			args{core.FakeIncoming("tetyys", prefix+"AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", &core.User{
 				ID:        1000,
 				Name:      "AlienFAn",
 				TwitchID:  777777,
 				FirstSeen: time.Date(2017, 10, 10, 21, 1, 1, 0, time.UTC).Format("2006-01-02 03:04:05"),
 			}, false, core.Twitch)},
 			&cmd.Context{
-				Incoming: core.FakeIncoming("tetyys", "|AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", &core.User{
+				Incoming: core.FakeIncoming("tetyys", prefix+"AYYyyyyyyyyyLMAAAAAoooooo_Alien_Please AlienPls Les GOOOO", &core.User{
 					ID:        1000,
 					Name:      "AlienFAn",
 					TwitchID:  777777,
@@ -322,12 +326,12 @@ func Test_prepareMessage(t *testing.T) {
 	}{
 		{"empty", args{""}, []string{""}, false},
 		{"no prefix", args{"Hi !!!"}, []string{"Hi", "!!!"}, false},
-		{"prefix but no text", args{config.Public.Global.CommandPrefix}, []string{""}, true},
-		{"prefix + cmd and 2 other arguments", args{"|testCMD lol xd"}, []string{"testCMD", "lol", "xd"}, true},
-		{"prefix and one word", args{config.Public.Global.CommandPrefix + "yourm0M"}, []string{"yourm0M"}, true},
-		{"prefix and multiple arguments", args{config.Public.Global.CommandPrefix + "help help FeelsDankMan how does this work?"}, []string{"help", "help", "FeelsDankMan", "how", "does", "this", "work?"}, true},
-		{"prefix character in middle", args{"My favorite textual character(s) in the universe is '" + config.Public.Global.CommandPrefix + "'! PogChamp"}, []string{
-			"My", "favorite", "textual", "character(s)", "in", "the", "universe", "is", "'" + config.Public.Global.CommandPrefix + "'!", "PogChamp",
+		{"prefix but no text", args{prefix}, []string{""}, true},
+		{"prefix + cmd and 2 other arguments", args{prefix + "testCMD lol xd"}, []string{"testCMD", "lol", "xd"}, true},
+		{"prefix and one word", args{prefix + "yourm0M"}, []string{"yourm0M"}, true},
+		{"prefix and multiple arguments", args{prefix + "help help FeelsDankMan how does this work?"}, []string{"help", "help", "FeelsDankMan", "how", "does", "this", "work?"}, true},
+		{"prefix character in middle", args{"My favorite textual character(s) in the universe is '" + prefix + "'! PogChamp"}, []string{
+			"My", "favorite", "textual", "character(s)", "in", "the", "universe", "is", "'" + prefix + "'!", "PogChamp",
 		}, false},
 	}
 	for _, tt := range tests {
