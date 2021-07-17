@@ -51,9 +51,14 @@ func (l stringList) Inclues(query string) bool {
 
 // All public config data
 type PublicConfig struct {
-	Twitch PublicTwitchConfig `json:"twitch"`
-	Global PublicGlobalConfig `json:"global"`
-	Users  PublicUsersConfig  `json:"users"`
+	Twitch      PublicTwitchConfig `json:"twitch"`
+	Global      PublicGlobalConfig `json:"global"`
+	Users       PublicUsersConfig  `json:"users"`
+	Development struct {
+		Channels []string `json:"channels"`
+		Prefix   string   `json:"prefix"`
+	} `json:"development"`
+	Production bool
 }
 
 // Should be used to init for a test
@@ -105,10 +110,15 @@ func getPublic() (*PublicConfig, error) {
 	}
 	var config PublicConfig
 	err = json.Unmarshal(bytes, &config)
-	if err != nil {
-		return nil, err
+	if _, err := os.Stat(filepath.Join(confDir, "PRODUCTION")); err == nil {
+		// Only set on load, not reload.
+		config.Production = true
+	} else if os.IsNotExist(err) {
+		// Development
+		config.Twitch.Channels = config.Development.Channels
+		config.Global.CommandPrefix = config.Development.Prefix
 	}
-	return &config, nil
+	return &config, err
 }
 
 // Reload the config from file
@@ -121,11 +131,17 @@ func (conf *PublicConfig) Reload() error {
 	if err != nil {
 		return err
 	}
-	var config PublicConfig
-	err = json.Unmarshal(bytes, &config)
+	var config *PublicConfig
+	err = json.Unmarshal(bytes, config)
 	if err != nil {
 		return err
 	}
+	if !conf.Production {
+		// Development
+		config.Twitch.Channels = config.Development.Channels
+		config.Global.CommandPrefix = config.Development.Prefix
+	}
+	*conf = *config
 	return nil
 }
 
@@ -167,8 +183,6 @@ type PrivateConfig struct {
 	Oauth string `json:"oauth"`
 	// Database config
 	Database PrivateDatabaseConfig `json:"database"`
-	// Is run production?
-	Prod bool `json:"production"`
 }
 
 // All private database config data
