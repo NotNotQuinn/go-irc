@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/data"
@@ -52,17 +53,33 @@ func runSqlFiles(dir string) (fileCount int, err error) {
 			if err != nil {
 				return fileCount, err
 			}
-			query := string(bytes)
-			fmt.Printf("Exec: \n%s\n", query)
-			res, err := data.CoreDB.Exec(query)
-			if err != nil {
-				return fileCount, err
+			rawQueries := strings.Split(string(bytes), ";")
+			var queries []string
+			for i, query := range rawQueries {
+				// Append missing semicolon, Trim query and ignore if its empty
+				if i+1 != len(query) {
+					query += ";"
+				}
+				trimmed := strings.Trim(query, " \r\n\t")
+				if trimmed == "" || trimmed == ";" {
+					continue
+				}
+				queries = append(queries, query)
 			}
-			rows, err := res.RowsAffected()
-			if err != nil {
-				return fileCount, err
+
+			for i, query := range queries {
+				// Still use the original string
+				res, err := data.CoreDB.Exec(query)
+				if err != nil {
+					return fileCount, err
+				}
+				rows, err := res.RowsAffected()
+				if err != nil {
+					return fileCount, err
+				}
+				fmt.Printf("%s (%d/%d): %d rows affected\n", item.Name(), i+1, len(queries), rows)
 			}
-			fmt.Printf("%s: %d rows affected\n", item.Name(), rows)
+			fileCount++
 		}
 	} else {
 		return fileCount, err
