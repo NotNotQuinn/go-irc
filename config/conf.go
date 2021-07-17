@@ -90,7 +90,6 @@ func Init() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Private: %v\n", Private)
 	return nil
 }
 
