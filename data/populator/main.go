@@ -21,16 +21,16 @@ func main() {
 		panic(err)
 	}
 	stats, err := runSqlFiles("./data/sql")
+	fmt.Printf("Ran %d files. (%d queries, %d rows affected)\n", stats.NumFiles, stats.NumQueries, stats.NumRows)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Ran %d files. (%d queries, %d rows affected)\n", stats.NumFiles, stats.NumQueries, stats.NumRows)
 }
 
 // Runs SQL files in a directory in alphabetical order.
 // Works best when files are labeled on their order, e.g. `00-database1.sql`, `01-table1.sql`
 //
-// Will only run files ending with `.sql`
+// Warning: SQL is split crudely by semi-colon and each part run individually.
 //
 // `dir`: Path to directory containing SQL files. Ignores directories and other files.
 func runSqlFiles(dir string) (stats struct{ NumFiles, NumQueries, NumRows int }, err error) {
@@ -77,6 +77,7 @@ func runSqlFiles(dir string) (stats struct{ NumFiles, NumQueries, NumRows int },
 				if err != nil {
 					return stats, err
 				}
+
 				fmt.Printf("%s (%d/%d): %d rows affected\n", item.Name(), i+1, len(queries), rows)
 				stats.NumRows += int(rows)
 				stats.NumQueries++
