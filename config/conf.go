@@ -216,5 +216,24 @@ func getPrivate() (conf *PrivateConfig, err error) {
 		return nil, err
 	}
 
+	if os.Getenv("WB_DOCKER") == "true" {
+		// Load test config and overwite database connection information.
+		testsConfFile, err := filepath.Abs(filepath.Join(confDir, "tests_private_conf.json"))
+		if err != nil {
+			return nil, err
+		}
+		bytes, err := ioutil.ReadFile(testsConfFile)
+		if err != nil {
+			return nil, err
+		}
+
+		var testsConfig PrivateConfig
+		err = json.Unmarshal(bytes, &testsConfig)
+		if err != nil {
+			return nil, err
+		}
+		config.Database = testsConfig.Database
+	}
+
 	return &config, nil
 }
