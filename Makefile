@@ -40,4 +40,4 @@ reset-test:
 	docker volume rm twitch-bot_mariadb_test_data
 
 lint-test: lint test
-all: build populator
+all: bot populator
