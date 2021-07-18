@@ -17,5 +17,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN make populator
+# Create binaries
+RUN make all
 ENTRYPOINT ["tests-docker-entrypoint.sh"]
