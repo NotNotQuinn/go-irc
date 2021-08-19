@@ -11,22 +11,15 @@ import (
 var pingCommand *Command = &Command{
 	Name: "ping",
 	Execution: func(ctx *Context) (*Return, error) {
-		var isDocker bool
-		val, present := os.LookupEnv("WB_DOCKER")
-		if present && val == "true" {
-			isDocker = true
-		}
-
-		var statusString string
 		var developmentStatus []string
-		if isDocker {
+		if os.Getenv("WB_DOCKER") == "true" {
 			developmentStatus = append(developmentStatus, "Dockerized")
 		}
-
 		if !config.Public.Production {
 			developmentStatus = append(developmentStatus, "Development build")
 		}
-		statusString = fmt.Sprintf("[%s]", strings.Join(developmentStatus, ", "))
+
+		statusString := fmt.Sprintf("[%s]", strings.Join(developmentStatus, ", "))
 		if statusString == "[]" {
 			statusString = ""
 		}
