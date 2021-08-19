@@ -7,19 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/data"
 )
 
 func main() {
-	err := config.InitForTests("./config")
-	if err != nil {
-		panic(err)
-	}
-	err = data.Init()
-	if err != nil {
-		panic(err)
-	}
 	stats, err := runSqlFiles("./data/sql")
 	fmt.Printf("Ran %d files. (%d queries, %d rows affected)\n", stats.NumFiles, stats.NumQueries, stats.NumRows)
 	if err != nil {

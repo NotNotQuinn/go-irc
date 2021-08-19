@@ -7,6 +7,8 @@ services:
             dockerfile: tests.Dockerfile
         depends_on:
             - mariadb
+        environment:
+            WB_TEST: "true"
 
     mariadb:
         image: mariadb:10.3.29

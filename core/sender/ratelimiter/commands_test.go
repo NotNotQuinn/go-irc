@@ -6,15 +6,10 @@ import (
 	"time"
 
 	"github.com/NotNotQuinn/go-irc/cmd"
-	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/core"
 )
 
 func TestMain(m *testing.M) {
-	err := config.InitForTests("../../../config")
-	if err != nil {
-		panic(err)
-	}
 	os.Exit(m.Run())
 }
 

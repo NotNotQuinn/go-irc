@@ -16,10 +16,6 @@ import (
 var prefix string
 
 func TestMain(m *testing.M) {
-	err := config.InitForTests("../../config")
-	if err != nil {
-		panic(err)
-	}
 	prefix = config.Public.Global.CommandPrefix
 
 	// ignore rate limits
