@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/NotNotQuinn/go-irc/config"
@@ -86,18 +85,12 @@ func GetUser(Name string, ID uint64) (*User, error) {
 // Will almost never fail to get a user
 //
 // Falls back to basic data from twitch user, if there was a problem getting or creating the user.
-func AlwaysGetUser(Name string, TwitchID string) *User {
+func AlwaysGetUser(Name string, TwitchID uint64) *User {
 	u, err := GetOrCreateUser(Name, TwitchID)
 	if err != nil {
 		Errors <- fmt.Errorf("error getting user for message: %w", err)
-		TID, err := strconv.ParseUint(TwitchID, 10, 64)
-		if err != nil {
-			// Should never happen
-			Errors <- err
-			return nil
-		}
 		u = &User{
-			TwitchID:  TID,
+			TwitchID:  TwitchID,
 			ID:        0,
 			Name:      Name,
 			FirstSeen: "",
@@ -107,19 +100,15 @@ func AlwaysGetUser(Name string, TwitchID string) *User {
 }
 
 // Gets a user, or creates it.
-func GetOrCreateUser(Name, TwitchID string) (*User, error) {
-	TID, err := strconv.ParseUint(TwitchID, 10, 64)
-	if err != nil {
-		return nil, err
-	}
+func GetOrCreateUser(Name string, TwitchID uint64) (*User, error) {
 	u, err := GetUser(Name, 0)
 	if err != nil {
-		u, err = CreateNewUser(Name, TID)
+		u, err = CreateNewUser(Name, TwitchID)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if u.TwitchID != TID {
+	if u.TwitchID != TwitchID {
 		return nil, errors.New("username does not match twitch id")
 	}
 
