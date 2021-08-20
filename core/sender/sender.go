@@ -4,9 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/client"
-	"github.com/NotNotQuinn/go-irc/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/NotNotQuinn/go-irc/core/sender/ratelimiter"
 )
 
@@ -14,7 +13,7 @@ import (
 func HandleAllSends(cc *client.ClientCollection) {
 	ratelimiter.Init()
 	for {
-		msg := <-channels.MessagesOUT
+		msg := <-core.MessagesOUT
 		// this must be async, because we wait for ratelimits
 		go func() {
 			if msg == nil {
@@ -25,18 +24,18 @@ func HandleAllSends(cc *client.ClientCollection) {
 			}
 			msg = handleFilterForMessage(msg)
 			switch msg.Platform {
-			case messages.Twitch:
+			case core.Twitch:
 				if msg.DM {
 					ratelimiter.InvokeWhisper()
-					cc.Twitch.Whisper(msg.User.Name(), msg.Message)
+					cc.Twitch.Whisper(msg.User.Name, msg.Message)
 					return
 				}
 				ratelimiter.InvokeMessage(msg.Channel)
 				cc.Twitch.Say(msg.Channel, msg.Message)
-			case messages.Unknown:
-				channels.Errors <- errors.New("platform set to 'unknown' for message, message not sent")
+			case core.Unknown:
+				core.Errors <- errors.New("platform set to 'unknown' for message, message not sent")
 			default:
-				channels.Errors <- fmt.Errorf("unknown platform '%d' (message shown below)\n%+v", msg.Platform, msg)
+				core.Errors <- fmt.Errorf("unknown platform '%d' (message shown below)\n%+v", msg.Platform, msg)
 			}
 		}()
 	}

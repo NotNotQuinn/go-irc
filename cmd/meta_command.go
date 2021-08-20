@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/NotNotQuinn/go-irc/channels"
+	"github.com/NotNotQuinn/go-irc/core"
 )
 
 var (
@@ -73,7 +73,7 @@ func (cmd *Command) ensureDefaults() {
 		}
 	}
 	if cmd.Name == "" {
-		channels.Errors <- fmt.Errorf("command does not have a name\n%+v", cmd)
+		core.Errors <- fmt.Errorf("command does not have a name\n%+v", cmd)
 		cmd.Name = NoCommandName
 	}
 	if cmd.Description == "" {
@@ -92,7 +92,7 @@ func (cmd *Command) Load() {
 	cmd.ensureDefaults()
 	err := cmd.onLoad()
 	if err != nil {
-		channels.Errors <- fmt.Errorf("error in %s command onLoad:\n  %w", cmd.Name, err)
+		core.Errors <- fmt.Errorf("error in %s command onLoad:\n  %w", cmd.Name, err)
 	}
 	cmd.register()
 }

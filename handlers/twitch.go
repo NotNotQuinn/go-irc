@@ -3,9 +3,8 @@ package handlers
 import (
 	"fmt"
 
-	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/config"
-	"github.com/NotNotQuinn/go-irc/core/command/messages"
+	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
@@ -18,18 +17,28 @@ func TwitchAttach(client *twitch.Client) {
 
 // Called on every whisper
 func whisper(msg twitch.WhisperMessage) {
-	channels.MessagesIN <- messages.NewIncoming(&msg)
+	out, err := core.NewIncoming(&msg)
+	if err != nil {
+		core.Errors <- fmt.Errorf("handle whisper: %w", err)
+		return
+	}
+	core.MessagesIN <- out
 }
 
 // Called on every privmsg
 func privmsg(msg twitch.PrivateMessage) {
-	channels.MessagesIN <- messages.NewIncoming(&msg)
+	out, err := core.NewIncoming(&msg)
+	if err != nil {
+		core.Errors <- fmt.Errorf("handle privmsg: %w", err)
+		return
+	}
+	core.MessagesIN <- out
 }
 
 // Called on connect
 func connected() {
 	fmt.Println("Connected!")
 	if config.Public.Production {
-		channels.MessagesOUT <- messages.FakeOutgoing("turtoise", "Hi :)", messages.Twitch)
+		core.MessagesOUT <- core.FakeOutgoing("turtoise", "Hi :)", core.Twitch)
 	}
 }

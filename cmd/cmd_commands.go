@@ -17,7 +17,7 @@ var (
 					Success: true,
 					Reply:   "Commands that are availible: ",
 				}
-				isAdmin := config.Public.Users.Admins.Inclues(c.Incoming.User.Name())
+				isAdmin := config.Public.Users.Admins.Inclues(c.Incoming.User.Name)
 				i := 0
 				for name, cmd := range Commands {
 					if cmd == nil {
