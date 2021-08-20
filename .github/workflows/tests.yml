@@ -1,7 +1,7 @@
 name: go test
 on:
   push:
-    branches:
+    branches: 
   pull_request:
     branches:
   workflow_dispatch:
@@ -16,7 +16,5 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      - name: Get modules
-        run: go get
       - name: Run tests
         run: make test

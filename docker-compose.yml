@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+    tests:
+        build:
+            context: .
+            dockerfile: tests.Dockerfile
+        depends_on:
+            - mariadb
+        environment:
+            WB_TEST: "true"
+
+    mariadb:
+        image: mariadb:10.3.29
+        restart: always
+        volumes:
+            - mariadb_test_data:/var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: IF CHAT SEES THIS VI VON ZULUL
+            MYSQL_DATABASE: wb_core
+
+volumes:
+    mariadb_test_data:

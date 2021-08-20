@@ -1,14 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/NotNotQuinn/go-irc/channels"
 	"github.com/NotNotQuinn/go-irc/client"
 	"github.com/NotNotQuinn/go-irc/cmd"
-	"github.com/NotNotQuinn/go-irc/config"
+	"github.com/NotNotQuinn/go-irc/core"
 	"github.com/NotNotQuinn/go-irc/core/incoming"
 	"github.com/NotNotQuinn/go-irc/core/sender"
 	"github.com/NotNotQuinn/go-irc/handlers"
@@ -23,16 +23,10 @@ func main() {
 	go incoming.HandleAll()
 
 	fmt.Print("Starting")
-	err := config.Init()
-	if err != nil {
-		panic(err)
-	}
+	cmd.LoadAll()
 
 	// Dots to show progress, even though they mostly go all at once
 	// its a good measure of startup speed changing over time.
-	fmt.Print(".")
-	cmd.LoadAll()
-
 	fmt.Print(".")
 	cc, err := client.GetCollection()
 	if err != nil {
@@ -40,14 +34,17 @@ func main() {
 	}
 
 	fmt.Print(".")
-	handlers.Handle(cc)
+	handled := handlers.Handle(cc)
+	if !handled.Twitch {
+		panic(errors.New("twitch handlers not initilized"))
+	}
+	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")
 	err = cc.JoinAll()
 	if err != nil {
 		panic(err)
 	}
-	go sender.HandleAllSends(cc)
 
 	fmt.Print(".")
 	err = cc.Connect()
@@ -63,7 +60,7 @@ func handleErrors() {
 		// although it doesnt seem like much, it allows for good error logging later on.
 		// Errors should only be passed to this stream if there is no other place, and
 		// a panic is not sutible
-		err := <-channels.Errors
+		err := <-core.Errors
 		fmt.Printf("Error: %+v\n", err)
 	}
 }
@@ -92,6 +89,7 @@ func recoverFromDisconnect() {
 			time.Sleep(sleepTime)
 			// I dont know what the best option would be to restart main - this is all I could come up with
 			// Stack could overflow
+			defer recoverFromDisconnect()
 			main()
 		}
 		panic(fmt.Errorf("%w", err))
