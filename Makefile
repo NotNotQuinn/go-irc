@@ -32,11 +32,11 @@ push: lint-test
 
 test: reset-test
 # Only build for now, may publish on docker hub and use an image.
-	docker compose build
-	docker compose up --abort-on-container-exit
+	docker-compose build
+	docker-compose up --abort-on-container-exit
 
 reset-test:
-	docker compose down
+	docker-compose down
 	docker volume rm -f twitch-bot_mariadb_test_data
 
 lint-test: lint test
