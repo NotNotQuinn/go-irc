@@ -23,7 +23,7 @@ func main() {
 //
 // Warning: SQL is split crudely by semi-colon and each part run individually.
 //
-// `dir`: Path to directory containing SQL files. Ignores directories and other files.
+// dir: Path to directory containing SQL files. Ignores directories and other files.
 func runSqlFiles(dir string) (stats struct{ NumFiles, NumQueries, NumRows int }, err error) {
 	stat, err := os.Stat(dir)
 	if err != nil {
@@ -35,7 +35,7 @@ func runSqlFiles(dir string) (stats struct{ NumFiles, NumQueries, NumRows int },
 
 	if items, err := os.ReadDir(dir); err == nil {
 		for _, item := range items {
-			if item.IsDir() {
+			if item.IsDir() || !strings.HasSuffix(item.Name(), ".sql") {
 				// Ignore
 				continue
 			}
