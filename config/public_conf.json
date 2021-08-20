@@ -1,23 +1,31 @@
 {
-	"twitch": {
-		"channels": [
-			"quinndt",
-			"supinic",
-			"jeffboys123",
-			"snappingbot",
-			"drtrihouse",
-			"daamj",
-			"alecbirdman",
-			"nimmy0",
-			"turtoise",
-			"koobytv"
-		]
-	},
-	"global": {
-		"commandPrefix": "|",
-		"user_agent": "Twitch chat bot - Wanductbot created by quinndt"
-	},
-	"users": {
-		"admins": ["quinndt"]
-	}
+        "twitch": {
+                "channels": [
+                        "quinndt",
+                        "supinic",
+                        "jeffboys123",
+                        "snappingbot",
+                        "alecbirdman",
+                        "nimmy0",
+                        "turtoise",
+                        "koobytv",
+                        "turtlelurk"
+                ]
+        },
+        "global": {
+                "commandPrefix": "|",
+                "user_agent": "Twitch chat bot - Wanductbot created by quinndt"
+        },
+        "users": {
+                "admins": [
+                        "quinndt"
+                ]
+        },
+        "development": {
+                "channels": [
+                        "turtoise"
+                ],
+                "prefix": "||"
+        },
+        "Production": true
 }
