@@ -4,12 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"strconv"
 	"time"
 
 	"github.com/NotNotQuinn/go-irc/config"
 	"github.com/NotNotQuinn/go-irc/data"
-	"github.com/gempir/go-twitch-irc/v2"
 )
 
 var (
@@ -30,13 +28,13 @@ type User struct {
 // Represents ability to perform actions as a specific user
 type UserPermissions struct {
 	// The user who's permissions are represented
-	User User
+	User *User
 	// Whether the user is admin
 	Admin bool
 }
 
 // Get the permissions of the user
-func (u User) GetPermissions() *UserPermissions {
+func (u *User) Perms() *UserPermissions {
 	perms := DefaultPermissions()
 	if config.Public.Users.Admins.Inclues(u.Name) {
 		perms.Admin = true
@@ -45,8 +43,6 @@ func (u User) GetPermissions() *UserPermissions {
 }
 
 // Get a user.
-//
-// Allowed types: string, and int
 func GetUser(Name string, ID uint64) (*User, error) {
 	if data.CoreDB == nil {
 		return nil, errors.New("database not availible")
@@ -89,20 +85,14 @@ func GetUser(Name string, ID uint64) (*User, error) {
 // Will almost never fail to get a user
 //
 // Falls back to basic data from twitch user, if there was a problem getting or creating the user.
-func AlwaysGetUser(tu twitch.User) *User {
-	u, err := getUser(tu)
+func AlwaysGetUser(Name string, TwitchID uint64) *User {
+	u, err := GetOrCreateUser(Name, TwitchID)
 	if err != nil {
 		Errors <- fmt.Errorf("error getting user for message: %w", err)
-		TID, err := strconv.ParseUint(tu.ID, 10, 64)
-		if err != nil {
-			// Should never happen
-			Errors <- err
-			return nil
-		}
 		u = &User{
-			TwitchID:  TID,
+			TwitchID:  TwitchID,
 			ID:        0,
-			Name:      tu.Name,
+			Name:      Name,
 			FirstSeen: "",
 		}
 	}
@@ -110,19 +100,15 @@ func AlwaysGetUser(tu twitch.User) *User {
 }
 
 // Gets a user, or creates it.
-func getUser(tu twitch.User) (*User, error) {
-	TID, err := strconv.ParseUint(tu.ID, 10, 64)
+func GetOrCreateUser(Name string, TwitchID uint64) (*User, error) {
+	u, err := GetUser(Name, 0)
 	if err != nil {
-		return nil, err
-	}
-	u, err := GetUser(tu.Name, 0)
-	if err != nil {
-		u, err = CreateNewUser(tu.Name, TID)
+		u, err = CreateNewUser(Name, TwitchID)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if u.TwitchID != TID {
+	if u.TwitchID != TwitchID {
 		return nil, errors.New("username does not match twitch id")
 	}
 
@@ -131,6 +117,9 @@ func getUser(tu twitch.User) (*User, error) {
 
 // Creates a new user, if the user already exists return nil.
 func CreateNewUser(Name string, Twitch_ID uint64) (*User, error) {
+	if data.CoreDB == nil {
+		return nil, errors.New("database not availible")
+	}
 	if u, _ := GetUser(Name, 0); u != nil && u.TwitchID == Twitch_ID {
 		return nil, fmt.Errorf("user not created: already exists with ID %d", u.ID)
 	}
@@ -155,6 +144,6 @@ func CreateNewUser(Name string, Twitch_ID uint64) (*User, error) {
 func DefaultPermissions() *UserPermissions {
 	return &UserPermissions{
 		Admin: false,
-		User:  User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
+		User:  &User{ID: 0, Name: "", TwitchID: 0, FirstSeen: ""},
 	}
 }

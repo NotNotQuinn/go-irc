@@ -17,12 +17,22 @@ func TwitchAttach(client *twitch.Client) {
 
 // Called on every whisper
 func whisper(msg twitch.WhisperMessage) {
-	core.MessagesIN <- core.NewIncoming(&msg)
+	out, err := core.NewIncoming(&msg)
+	if err != nil {
+		core.Errors <- fmt.Errorf("handle whisper: %w", err)
+		return
+	}
+	core.MessagesIN <- out
 }
 
 // Called on every privmsg
 func privmsg(msg twitch.PrivateMessage) {
-	core.MessagesIN <- core.NewIncoming(&msg)
+	out, err := core.NewIncoming(&msg)
+	if err != nil {
+		core.Errors <- fmt.Errorf("handle privmsg: %w", err)
+		return
+	}
+	core.MessagesIN <- out
 }
 
 // Called on connect

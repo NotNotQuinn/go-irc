@@ -1,0 +1,8 @@
+{
+    "database": {
+        "username": "root",
+        "password": "IF CHAT SEES THIS VI VON ZULUL",
+        "host": "mariadb",
+        "port": 3306
+    }
+}

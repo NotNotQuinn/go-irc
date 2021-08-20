@@ -1,37 +1,47 @@
 package core
 
 import (
+	"strconv"
+
 	"github.com/gempir/go-twitch-irc/v2"
 )
 
 // Create an messages.Incoming message from a twitch message
-func NewIncoming(msg interface{ GetType() twitch.MessageType }) *Incoming {
+func NewIncoming(msg interface{ GetType() twitch.MessageType }) (*Incoming, error) {
 	if msg == nil {
-		return nil
+		return nil, nil
 	}
 	switch v := msg.(type) {
 	case *twitch.WhisperMessage:
+		TwitchID, err := strconv.ParseUint(v.User.ID, 10, 64)
+		if err != nil {
+			return nil, err
+		}
 		return &Incoming{
 			Platform: Twitch,
 			Channel:  "",
 			Message:  v.Message,
-			User:     AlwaysGetUser(v.User),
+			User:     AlwaysGetUser(v.User.Name, TwitchID),
 			Raw:      (*twitch.Message)(&msg),
 			DMs:      true,
-		}
+		}, nil
 	case *twitch.PrivateMessage:
+		TwitchID, err := strconv.ParseUint(v.User.ID, 10, 64)
+		if err != nil {
+			return nil, err
+		}
 		return &Incoming{
 			Platform: Twitch,
 			Channel:  v.Channel,
 			Message:  v.Message,
-			User:     AlwaysGetUser(v.User),
+			User:     AlwaysGetUser(v.User.Name, TwitchID),
 			Raw:      (*twitch.Message)(&msg),
-		}
+		}, nil
 	default:
 		return &Incoming{
 			Platform: Twitch,
 			Raw:      (*twitch.Message)(&msg),
-		}
+		}, nil
 	}
 }
 

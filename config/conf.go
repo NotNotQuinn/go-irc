@@ -9,11 +9,6 @@ import (
 	"path/filepath"
 )
 
-// Directory to look for config files
-var confDir = "./config"
-var confFile = filepath.Join(confDir, "public_conf.json")
-var privConfPath = filepath.Join(confDir, "private_conf.json")
-
 // Public config data
 var Public *PublicConfig
 
@@ -59,44 +54,37 @@ type PublicConfig struct {
 		Prefix   string   `json:"prefix"`
 	} `json:"development"`
 	Production bool
-}
-
-// Should be used to init for a test
-//
-// Path is a path from the module directory to the config directory.
-// As this changes for every module it makes sense to pass this data.
-func InitForTests(path string) error {
-	cwd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	confDir, err = filepath.Abs(filepath.Join(cwd, path))
-	if err != nil {
-		return err
-	}
-	confFile = filepath.Join(confDir, "public_conf.json")
-	privConfPath = filepath.Join(confDir, "private_conf.json")
-	// skip private - for automatic testing
-	Public, err = getPublic()
-	return err
+	// The file the config was loaded from
+	originFile string
 }
 
 // Load the configs and assign them to the variables
-func Init() error {
+func init() {
+	// Directory to look for config files
+	var confDir = "./config"
+	var privConfPath = filepath.Join(confDir, "private_conf.json")
+
+	fmt.Println("WB_TEST = " + os.Getenv("WB_TEST"))
+	if os.Getenv("WB_TEST") == "true" {
+		// When inside docker container
+		confDir = "/bot/config/"
+		privConfPath = filepath.Join(confDir, "tests_private_conf.json")
+	}
+
+	var confFile = filepath.Join(confDir, "public_conf.json")
 	var err error
-	Private, err = getPrivate()
+	Private, err = getPrivate(privConfPath)
 	if err != nil {
-		return err
+		panic(err)
 	}
-	Public, err = getPublic()
+	Public, err = getPublic(confFile)
 	if err != nil {
-		return err
+		panic(err)
 	}
-	return nil
 }
 
 // Load and return the public config
-func getPublic() (*PublicConfig, error) {
+func getPublic(confFile string) (*PublicConfig, error) {
 	path, err := filepath.Abs(confFile)
 	if err != nil {
 		return nil, err
@@ -107,7 +95,7 @@ func getPublic() (*PublicConfig, error) {
 	}
 	var config PublicConfig
 	err = json.Unmarshal(bytes, &config)
-	if _, err := os.Stat(filepath.Join(confDir, "PRODUCTION")); err == nil {
+	if _, err := os.Stat(filepath.Join(filepath.Join(confFile, ".."), "PRODUCTION")); err == nil {
 		// Only set on load, not reload.
 		config.Production = true
 	} else if os.IsNotExist(err) {
@@ -120,7 +108,7 @@ func getPublic() (*PublicConfig, error) {
 
 // Reload the config from file
 func (conf *PublicConfig) Reload() error {
-	path, err := filepath.Abs(confFile)
+	path, err := filepath.Abs(conf.originFile)
 	if err != nil {
 		return err
 	}
@@ -148,7 +136,7 @@ func (conf *PublicConfig) Save() (success bool, err error) {
 	if err != nil {
 		return false, err
 	}
-	path, err := filepath.Abs(confFile)
+	path, err := filepath.Abs(conf.originFile)
 	if err != nil {
 		return false, err
 	}
@@ -196,7 +184,7 @@ func (D *PrivateDatabaseConfig) ConnecterString(database string) string {
 }
 
 // Load and return private config
-func getPrivate() (conf *PrivateConfig, err error) {
+func getPrivate(privConfPath string) (conf *PrivateConfig, err error) {
 	path, err := filepath.Abs(privConfPath)
 	if err != nil {
 		return nil, err
@@ -211,6 +199,25 @@ func getPrivate() (conf *PrivateConfig, err error) {
 
 	if err != nil {
 		return nil, err
+	}
+
+	if os.Getenv("WB_TEST") == "true" {
+		// Load test config and overwite database connection information.
+		testsConfFile, err := filepath.Abs(filepath.Join(filepath.Join(privConfPath, ".."), "tests_private_conf.json"))
+		if err != nil {
+			return nil, err
+		}
+		bytes, err := ioutil.ReadFile(testsConfFile)
+		if err != nil {
+			return nil, err
+		}
+
+		var testsConfig PrivateConfig
+		err = json.Unmarshal(bytes, &testsConfig)
+		if err != nil {
+			return nil, err
+		}
+		config.Database = testsConfig.Database
 	}
 
 	return &config, nil
